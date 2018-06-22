@@ -78,7 +78,7 @@ namespace Winton.DomainModelling.DocumentDb
                 Action action = entityWithoutId.Invoking(e => e.WithId<EntityWithIntId, int>());
 
                 action.Should().Throw<NotSupportedException>()
-                      .WithMessage("Automatic generation of Int32 ID not supported.");
+                      .WithMessage("Automatic ID generation for Int32 not supported.");
             }
 
             [Fact]
@@ -89,7 +89,7 @@ namespace Winton.DomainModelling.DocumentDb
                 Action action = entityWithoutId.Invoking(e => e.WithId<EntityWithNumericalId, NumericalId>());
 
                 action.Should().Throw<NotSupportedException>()
-                      .WithMessage("Automatic generation of NumericalId ID not supported.");
+                      .WithMessage("Automatic ID generation for NumericalId not supported.");
             }
 
             [JsonConverter(typeof(SingleValueConverter))]

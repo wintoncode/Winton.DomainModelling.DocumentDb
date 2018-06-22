@@ -23,7 +23,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
             catch (Exception)
             {
-                throw new NotSupportedException($"Automatic generation of {typeof(TEntityId).Name} ID not supported.");
+                throw new NotSupportedException($"Automatic ID generation for {typeof(TEntityId).Name} not supported.");
             }
         }
     }
