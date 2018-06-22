@@ -29,7 +29,7 @@
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" PrivateAssets="All" />
-    <PackageReference Include="Winton.DomainModelling.Abstractions" Version="0.1.0-master0004" />
+    <PackageReference Include="Winton.DomainModelling.Abstractions" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
