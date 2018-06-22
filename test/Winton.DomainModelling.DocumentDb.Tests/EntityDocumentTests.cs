@@ -103,8 +103,7 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 typeof(EntityDocument<TestEntity, EntityId>)
                     .GetProperty(nameof(EntityDocument<TestEntity, EntityId>.Id))
-                    .Should().BeDecoratedWith<JsonPropertyAttribute>().Which.PropertyName
-                    .Should().Be("id");
+                    .Should().BeDecoratedWith<JsonPropertyAttribute>(a => a.PropertyName == "id");
             }
         }
 
