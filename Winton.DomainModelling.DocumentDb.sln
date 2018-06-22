@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2026
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B70E1756-208C-4D97-9C84-CFE1625977FF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8BDE761F-4C37-4AE9-93C5-482FB9F533AD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Winton.DomainModelling.DocumentDb", "src\Winton.DomainModelling.DocumentDb\Winton.DomainModelling.DocumentDb.csproj", "{23C5B1FF-7F50-4C40-BA2D-3177B14F46DD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Winton.DomainModelling.DocumentDb.Tests", "test\Winton.DomainModelling.DocumentDb.Tests\Winton.DomainModelling.DocumentDb.Tests.csproj", "{25F76BEB-C750-48AD-A94B-E6D3ECBD64F8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Winton.DomainModelling.DocumentDb.Tests.Integration", "test\Winton.DomainModelling.DocumentDb.Tests.Integration\Winton.DomainModelling.DocumentDb.Tests.Integration.csproj", "{56469B0B-2BF2-4961-9511-9D89A08DD9C6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{90869527-D332-48C8-9D75-FF16E8E72973}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		GitVersionConfig.yaml = GitVersionConfig.yaml
+		Jenkinsfile = Jenkinsfile
+		README.md = README.md
+		stylecop.json = stylecop.json
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{23C5B1FF-7F50-4C40-BA2D-3177B14F46DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23C5B1FF-7F50-4C40-BA2D-3177B14F46DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23C5B1FF-7F50-4C40-BA2D-3177B14F46DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23C5B1FF-7F50-4C40-BA2D-3177B14F46DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25F76BEB-C750-48AD-A94B-E6D3ECBD64F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25F76BEB-C750-48AD-A94B-E6D3ECBD64F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25F76BEB-C750-48AD-A94B-E6D3ECBD64F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25F76BEB-C750-48AD-A94B-E6D3ECBD64F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56469B0B-2BF2-4961-9511-9D89A08DD9C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56469B0B-2BF2-4961-9511-9D89A08DD9C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56469B0B-2BF2-4961-9511-9D89A08DD9C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56469B0B-2BF2-4961-9511-9D89A08DD9C6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{23C5B1FF-7F50-4C40-BA2D-3177B14F46DD} = {B70E1756-208C-4D97-9C84-CFE1625977FF}
+		{25F76BEB-C750-48AD-A94B-E6D3ECBD64F8} = {8BDE761F-4C37-4AE9-93C5-482FB9F533AD}
+		{56469B0B-2BF2-4961-9511-9D89A08DD9C6} = {8BDE761F-4C37-4AE9-93C5-482FB9F533AD}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F39C7D3E-5DF8-4F40-86E7-6C14FD9F6067}
+	EndGlobalSection
+EndGlobal
