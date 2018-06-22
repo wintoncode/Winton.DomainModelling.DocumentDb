@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Authors>Winton</Authors>
+    <Company>Winton</Company>
+    <Copyright>Copyright 2018 Winton</Copyright>
+    <Description>Provides common types for persisting domain objects to DocumentDB.</Description>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);SA0001;SA1101;SA1309;SA1413;SA1633;SA1652</NoWarn>
+    <PackageId>Winton.DomainModelling.DocumentDb</PackageId>
+    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+    <PackageTags>Winton, Domain, Driven, Design, Modelling, DDD, Persistence, DocumentDB, CosmosDB, Document, Cosmos, DB</PackageTags>
+    <PackageVersion>$(NuGetVersion)</PackageVersion>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <Title>Winton Domain Modelling DocumentDB</Title>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="..\..\stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Bt.Tooling.ReSharper" Version="1.3.0" PrivateAssets="All" />
+    <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" PrivateAssets="All" />
+    <PackageReference Include="Winton.DomainModelling.Abstractions" Version="0.1.0-master0004" />
+  </ItemGroup>
+
+</Project>
