@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Winton.DomainModelling.DocumentDB\Winton.DomainModelling.DocumentDB.csproj" />
+    <ProjectReference Include="..\..\src\Winton.DomainModelling.DocumentDb\Winton.DomainModelling.DocumentDb.csproj" />
   </ItemGroup>
 
 </Project>
