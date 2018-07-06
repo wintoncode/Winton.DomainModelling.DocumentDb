@@ -3,6 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{90869527-D332-48C8-9D75-FF16E8E72973}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		GitVersionConfig.yaml = GitVersionConfig.yaml
+		README.md = README.md
+		stylecop.json = stylecop.json
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B70E1756-208C-4D97-9C84-CFE1625977FF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8BDE761F-4C37-4AE9-93C5-482FB9F533AD}"
@@ -11,16 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Winton.DomainModelling.Docu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Winton.DomainModelling.DocumentDb.Tests", "test\Winton.DomainModelling.DocumentDb.Tests\Winton.DomainModelling.DocumentDb.Tests.csproj", "{25F76BEB-C750-48AD-A94B-E6D3ECBD64F8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Winton.DomainModelling.DocumentDb.Tests.Integration", "test\Winton.DomainModelling.DocumentDb.Tests.Integration\Winton.DomainModelling.DocumentDb.Tests.Integration.csproj", "{56469B0B-2BF2-4961-9511-9D89A08DD9C6}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{90869527-D332-48C8-9D75-FF16E8E72973}"
-	ProjectSection(SolutionItems) = preProject
-		.gitignore = .gitignore
-		GitVersionConfig.yaml = GitVersionConfig.yaml
-		Jenkinsfile = Jenkinsfile
-		README.md = README.md
-		stylecop.json = stylecop.json
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Winton.DomainModelling.DocumentDb.IntegrationTests", "test\Winton.DomainModelling.DocumentDb.IntegrationTests\Winton.DomainModelling.DocumentDb.IntegrationTests.csproj", "{56469B0B-2BF2-4961-9511-9D89A08DD9C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
