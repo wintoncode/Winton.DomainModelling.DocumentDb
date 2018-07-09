@@ -159,4 +159,4 @@ internal sealed class TransactionRepository : ITransactionRepository
 }
 ```
 
-These repositories will store their respective entities in a single shared collection, using the entity type names to namespace the IDs and discriminate between each type. Therefore, these names should be considered immutable once entities have been persisted.
+These repositories will store their respective entities in a single shared collection, using the entity type names to namespace the IDs and discriminate between each type. Therefore, these names should be considered part of the document schema, and would therefore require a data migration if they were changed as part of a domain refactoring.
