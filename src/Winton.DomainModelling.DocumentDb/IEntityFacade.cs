@@ -13,8 +13,7 @@ namespace Winton.DomainModelling.DocumentDb
     public interface IEntityFacade
     {
         /// <summary>
-        ///     Create an <see cref="Entity{TEntityId}" /> of a specified type. Supports automatic ID generation for
-        ///     <see cref="string" />-serializable ID types, otherwise IDs must be set before creating.
+        ///     Create an <see cref="Entity{TEntityId}" /> of a specified type.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <typeparam name="TEntityId">The ID type of the entity.</typeparam>

@@ -43,8 +43,7 @@ namespace Winton.DomainModelling.DocumentDb
         /// <inheritdoc />
         /// <summary>
         ///     Create an <see cref="T:Winton.DomainModelling.Entity`1" /> of a specified type. Supports automatic ID generation
-        ///     for
-        ///     <see cref="T:System.String" />-serializable ID types, otherwise IDs must be set before creating.
+        ///     for <see cref="T:System.String" />-serializable ID types, otherwise IDs must be set before creating.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <typeparam name="TEntityId">The ID type of the entity.</typeparam>
