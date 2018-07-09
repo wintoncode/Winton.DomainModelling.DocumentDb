@@ -3,16 +3,24 @@ environment:
   CLI_VERSION: latest
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOCUMENT_DB_URI: https://localhost:8081
+  DOCUMENT_DB_KEY: C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==
 image: Visual Studio 2017
 configuration:
     - Release
 skip_tags: true
+install:
+    - ps: Start-FileDownload "https://aka.ms/cosmosdb-emulator" -FileName "C:\Azure Cosmos DB.Emulator.msi"
+    - cmd: cmd /c start /wait msiexec /i "C:\Azure Cosmos DB.Emulator.msi" /qn /quiet /norestart /log install.log
+    - ps: Start-Process "C:\Program Files\Azure Cosmos DB Emulator\CosmosDB.Emulator.exe" -ArgumentList "/NoExplorer","/NoUI"
+    - ps: Start-Sleep -s 15
 before_build:
     - dotnet restore
 build_script:
     - msbuild /p:GetVersion=True /p:WriteVersionInfoToBuildLog=True
 test_script:
     - dotnet test test/Winton.DomainModelling.DocumentDb.Tests/ --no-build --configuration Release
+    - dotnet test test/Winton.DomainModelling.DocumentDb.IntegrationTests/ --no-build --configuration Release
 artifacts:
 - path: .\**\*.nupkg
   name: NuGet

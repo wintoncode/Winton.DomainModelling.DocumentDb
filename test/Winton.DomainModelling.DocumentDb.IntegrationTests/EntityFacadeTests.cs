@@ -22,14 +22,15 @@ namespace Winton.DomainModelling.DocumentDb
 
         public EntityFacadeTests()
         {
-            string documentDbUri = Environment.GetEnvironmentVariable(nameof(documentDbUri));
-            string documentDbReadWriteKey = Environment.GetEnvironmentVariable(nameof(documentDbReadWriteKey));
-            string databaseId = Environment.GetEnvironmentVariable(nameof(databaseId));
+            string documentDbUri = Environment.GetEnvironmentVariable("DOCUMENT_DB_URI");
+            string documentDbKey = Environment.GetEnvironmentVariable("DOCUMENT_DB_KEY");
 
-            _documentClient = new DocumentClient(new Uri(documentDbUri), documentDbReadWriteKey);
-            _database = _documentClient.CreateDatabaseIfNotExistsAsync(new Database { Id = databaseId }).Result.Resource;
-
+            var database = new Database { Id = nameof(EntityFacadeTests) };
             var documentCollection = new DocumentCollection { Id = nameof(EntityFacadeTests) };
+
+            _documentClient = new DocumentClient(new Uri(documentDbUri), documentDbKey);
+            _database = _documentClient.CreateDatabaseIfNotExistsAsync(database).Result.Resource;
+
             var requestOptions = new RequestOptions { OfferThroughput = 400 };
             _documentClient.CreateDocumentCollectionIfNotExistsAsync(
                 _database.SelfLink,
