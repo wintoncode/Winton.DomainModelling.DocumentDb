@@ -74,7 +74,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Type : EntityDocumentTests
+        public sealed class Type : ValueObjectDocumentTests
         {
             [Fact]
             private void ShouldReturnEntityType()
