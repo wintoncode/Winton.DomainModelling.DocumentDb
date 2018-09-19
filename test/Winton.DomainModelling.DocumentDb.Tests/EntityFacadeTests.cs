@@ -38,7 +38,7 @@ namespace Winton.DomainModelling.DocumentDb
                 Action constructing = Constructing(() => new EntityFacade(null, documentCollection, null));
 
                 constructing.Should().Throw<NotSupportedException>()
-                            .WithMessage("Partitioned collections not supported.");
+                            .WithMessage("Partitioned collections are not supported.");
             }
         }
     }

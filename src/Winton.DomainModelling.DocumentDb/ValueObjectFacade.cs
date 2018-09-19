@@ -33,7 +33,7 @@ namespace Winton.DomainModelling.DocumentDb
         {
             if (documentCollection.PartitionKey.Paths.Any())
             {
-                throw new NotSupportedException("Partitioned collections not supported.");
+                throw new NotSupportedException("Partitioned collections are not supported.");
             }
 
             _database = database;
