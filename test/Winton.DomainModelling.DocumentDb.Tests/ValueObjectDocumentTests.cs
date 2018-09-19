@@ -44,7 +44,7 @@ namespace Winton.DomainModelling.DocumentDb
         public sealed class GetDocumentType : ValueObjectDocumentTests
         {
             [Fact]
-            private void ShouldReturnEntityType()
+            private void ShouldReturnValueObjectType()
             {
                 string type = ValueObjectDocument<TestValueObject>.GetDocumentType();
 
@@ -77,7 +77,7 @@ namespace Winton.DomainModelling.DocumentDb
         public sealed class Type : ValueObjectDocumentTests
         {
             [Fact]
-            private void ShouldReturnEntityType()
+            private void ShouldReturnValueObjectType()
             {
                 var valueObject = new TestValueObject("A");
                 ValueObjectDocument<TestValueObject> document = ValueObjectDocument<TestValueObject>.Create(valueObject);
