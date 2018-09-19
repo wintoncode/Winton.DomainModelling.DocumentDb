@@ -51,13 +51,7 @@ namespace Winton.DomainModelling.DocumentDb
         public async Task Create<TValueObject>(TValueObject valueObject)
             where TValueObject : struct, IEquatable<TValueObject>
         {
-            string valueObjectType = ValueObjectDocument<TValueObject>.GetDocumentType();
-
-            ValueObjectDocument<TValueObject> document =
-                _documentClient.CreateDocumentQuery<ValueObjectDocument<TValueObject>>(GetUri())
-                               .Where(x => x.Type == valueObjectType)
-                               .AsEnumerable()
-                               .SingleOrDefault(x => x.ValueObject.Equals(valueObject));
+            ValueObjectDocument<TValueObject> document = Get(valueObject);
 
             if (document == null)
             {
@@ -77,13 +71,7 @@ namespace Winton.DomainModelling.DocumentDb
         public async Task Delete<TValueObject>(TValueObject valueObject)
             where TValueObject : struct, IEquatable<TValueObject>
         {
-            string valueObjectType = ValueObjectDocument<TValueObject>.GetDocumentType();
-
-            ValueObjectDocument<TValueObject> document =
-                _documentClient.CreateDocumentQuery<ValueObjectDocument<TValueObject>>(GetUri())
-                               .Where(x => x.Type == valueObjectType)
-                               .AsEnumerable()
-                               .SingleOrDefault(x => x.ValueObject.Equals(valueObject));
+            ValueObjectDocument<TValueObject> document = Get(valueObject);
 
             if (document != null)
             {
@@ -100,11 +88,24 @@ namespace Winton.DomainModelling.DocumentDb
         public IQueryable<TValueObject> Query<TValueObject>()
             where TValueObject : struct, IEquatable<TValueObject>
         {
+            return CreateValueObjectDocumentQuery<TValueObject>().Select(x => x.ValueObject);
+        }
+
+        private IQueryable<ValueObjectDocument<TValueObject>> CreateValueObjectDocumentQuery<TValueObject>()
+            where TValueObject : struct, IEquatable<TValueObject>
+        {
             string valueObjectType = ValueObjectDocument<TValueObject>.GetDocumentType();
 
             return _documentClient.CreateDocumentQuery<ValueObjectDocument<TValueObject>>(GetUri())
-                                  .Where(x => x.Type == valueObjectType)
-                                  .Select(x => x.ValueObject);
+                                  .Where(x => x.Type == valueObjectType);
+        }
+
+        private ValueObjectDocument<TValueObject> Get<TValueObject>(TValueObject valueObject)
+            where TValueObject : struct, IEquatable<TValueObject>
+        {
+            return CreateValueObjectDocumentQuery<TValueObject>()
+                .AsEnumerable()
+                .SingleOrDefault(x => x.ValueObject.Equals(valueObject));
         }
 
         private Uri GetUri()
