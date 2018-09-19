@@ -12,9 +12,9 @@ namespace Winton.DomainModelling.DocumentDb
 {
     /// <inheritdoc />
     /// <summary>
-    ///     An abstraction layer over <see cref="Entity{TEntityId}" /> CRUD operations in DocumentDb. Allows multiple entity
-    ///     types to be transparently stored in one collection using a 'wrapper' document type with a type discriminator and
-    ///     namespaced ID.
+    ///     An abstraction layer over <see cref="Entity{TEntityId}" /> CRUD operations in DocumentDb. Allows multiple types to
+    ///     be transparently stored in one collection using a 'wrapper' document type with a type discriminator and namespaced
+    ///     ID.
     /// </summary>
     public sealed class EntityFacade : IEntityFacade
     {
