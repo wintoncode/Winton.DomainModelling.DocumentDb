@@ -5,36 +5,46 @@
 [![NuGet version](https://img.shields.io/nuget/v/Winton.DomainModelling.DocumentDb.svg)](https://www.nuget.org/packages/Winton.DomainModelling.DocumentDb)
 [![NuGet version](https://img.shields.io/nuget/vpre/Winton.DomainModelling.DocumentDb.svg)](https://www.nuget.org/packages/Winton.DomainModelling.DocumentDb)
 
-A facade library useful for [Entity](https://github.com/wintoncode/Winton.DomainModelling.Abstractions#entity) operations in DocumentDb (SQL API).
+A facade library useful for [Entity](https://github.com/wintoncode/Winton.DomainModelling.Abstractions#entity) and Value Object operations in DocumentDb (SQL API).
+
+This implementations allow multiple types to be transparently stored in one collection using 'wrapper' documents with type discriminators and namespaced IDs (for entities). It can be tempting for those from a traditional SQL background to provision a separate collection per type. However, this is often unnecessarily expensive, especially if much of the reserved throughput for a given collection is unused. Taking advantage of the "schemaless" nature of a document store, such as DocumentDb, can both reduce cost and simplify infrastructural complexity. This implementation provides an easy way to work with a single collection within a bounded context (within which persisted type names are unique) while outwardly still achieving the desired level of strong typing. There really is a schema, but the database doesn't need to know about it.
 
 ## Types
 
 ### IEntityFacade
 
-An abstraction layer over [Entity](https://github.com/wintoncode/Winton.DomainModelling.Abstractions#entity) CRUD operations in DocumentDb. Provides strong typed Create, Read (including Query), **Upsert**, and Delete methods.
+An abstraction layer over [Entity](https://github.com/wintoncode/Winton.DomainModelling.Abstractions#entity) CRUD operations in DocumentDb. Provides strong typed Create, Read, **Upsert**, Delete, and Query methods.
 
 ### EntityFacade
 
 The default implementation of `IEntityFacade`. The Create method supports automatic ID generation for string-serializable ID types, otherwise IDs must be set before creating.
 
-This implementation allows multiple entity types to be transparently stored in one collection (using a 'wrapper' document with a type discriminator and namespaced ID). It can be tempting for those from a traditional SQL background to provision a separate collection per entity type. However, this is often unnecessarily expensive, especially if much of the reserved throughput for a given collection is unused. Taking advantage of the "schemaless" nature of a document store, such as DocumentDb, can both reduce cost and simplify infrastructural complexity. This implementation provides an easy way to work with a single collection within a bounded context (within which entity type names are unique) while outwardly still achieving the desired level of strong typing. There really is a schema, but the database doesn't need to know about it.
+Note that this implementation is currently **incompatible with partitioned collections**. This restriction could potentially be lifted in a future version, at the expense of implementation complexity (and probably a leakier abstraction). However, for applications requiring large collections, where partitioning is actually needed, the conveniences provided by this facade are unlikely to be suitable anyway.
+
+### IValueObjectFacade
+
+An abstraction layer over Value Object operations in DocumentDb. Provides strong typed Create, Delete, and Query methods.
+
+### ValueObjectFacade
+
+The default implementation of `IValueObjectFacade`.
 
 Note that this implementation is currently **incompatible with partitioned collections**. This restriction could potentially be lifted in a future version, at the expense of implementation complexity (and probably a leakier abstraction). However, for applications requiring large collections, where partitioning is actually needed, the conveniences provided by this facade are unlikely to be suitable anyway.
 
 ## Usage
 
-The constructor for `EntityFacade` takes a [Database](https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.documents.database), a [DocumentCollection](https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.documents.documentcollection), and an [IDocumentClient](https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.documents.idocumentclient). Of course, resolving all dependencies from a DI container is preferred, but for clarity an `EntityFacade` can be manually constructed as
+The constructors for both `EntityFacade` and `ValueObjectFacade` take a [Database](https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.documents.database), a [DocumentCollection](https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.documents.documentcollection), and an [IDocumentClient](https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.documents.idocumentclient). Of course, resolving all dependencies from a DI container is preferred, but for clarity they can be manually constructed as
 
 ```csharp
 Database database = new Database { Id = "AllTheData" };
 DocumentCollection documentCollection = new DocumentCollection { Id = "AccountingData" };
-
 IDocumentClient documentClient = new DocumentClient(...);
 
 IEntityFacade entityFacade = new EntityFacade(database, documentCollection, documentClient);
+IValueObjectFacade valueObjectFacade = new ValueObjectFacade(database, documentCollection, documentClient);
 ```
 
-Consider some application with an "Accounting" domain containing 2 entity types, `Account` and `Transaction`, each with a [strong typed](https://tech.winton.com/2017/06/strong-typing-a-pattern-for-more-robust-code/) ID. Note that both ID types use [SingleValueConverter](https://github.com/wintoncode/Winton.Extensions.Serialization.Json#singlevalueconverter), so they are string-serializable.
+Consider some application with an "Accounting" domain containing 2 entity types, `Account` and `Transaction`, each with a [strong typed](https://tech.winton.com/2017/06/strong-typing-a-pattern-for-more-robust-code/) ID. Note that both ID types use [SingleValueConverter](https://github.com/wintoncode/Winton.Extensions.Serialization.Json#singlevalueconverter), so they are string-serializable. The "Accounting" domain also contains a value object type, `AccountType`, used as reference data.
 
 ```csharp
 [JsonConverter(typeof(SingleValueConverter))]
@@ -47,15 +57,15 @@ public sealed class Account : Entity<AccountId>
 {
     public Account(
         AccountId id,
-        AccountName name,
+        AccountType type,
         ...)
         : base(id)
     {
-        Name = name;
+        Type = type;
         ...
     }
 
-    public AccountName Name { get; }
+    public AccountType Type { get; }
 
     ...
 }
@@ -86,6 +96,27 @@ public sealed class Transaction : Entity<TransactionId>
 
     ...
 }
+
+public struct AccountType : IEquatable<AccountType>
+{
+    [JsonConstructor]
+    public AccountType(
+        string name,
+        decimal rate,
+        ...)
+        : base(id)
+    {
+        Name = name;
+        Rate = rate;
+        ...
+    }
+
+    public string Name { get; }
+
+    public decimal Rate { get; }
+
+    ...
+}
 ```
 
 These types could each have their own repository interfaces, defined within the "Accounting" domain.
@@ -108,9 +139,18 @@ public interface ITransactionRepository
 
     ...
 }
+
+public interface IAccountTypeRepository
+{
+    Task Create(AccountType accountType);
+
+    IEnumerable<AccountType> GetAll();
+
+    ...
+}
 ```
 
-The respective implementations of these repositories, potentially defined in a separate "Persistence" layer, would simply be thin wrappers around the `IEntityFacade`.
+The respective implementations of these repositories, potentially defined in a separate "Persistence" layer, would simply be thin wrappers around the `IEntityFacade` or `IValueObjectFacade`.
 
 ```csharp
 internal sealed class AccountRepository : IAccountRepository
@@ -152,11 +192,35 @@ internal sealed class TransactionRepository : ITransactionRepository
     public IEnumerable<Transaction> GetAllSentBy(AccountId accountId)
     {
         return _entityFacade.Query<Transaction, TransactionId>()
-                            .Where(t => t.Sender == accountId);
+                            .Where(t => t.Sender == accountId)
+                            .AsEnumerable();
+    }
+
+    ...
+}
+
+internal sealed class AccountTypeRepository : IAccountTypeRepository
+{
+    private readonly IValueObjectFacade _valueObjectFacade;
+
+    public AccountTypeRepository(IValueObjectFacade valueObjectFacade)
+    {
+        _valueObjectFacade = valueObjectFacade;
+    }
+
+    public async Task Create(AccountType accountType)
+    {
+        await _valueObjectFacade.Create<AccountType>(accountType);
+    }
+
+    public IEnumerable<AccountType> GetAll()
+    {
+        return _valueObjectFacade.Query<AccountType>()
+                                 .AsEnumerable();
     }
 
     ...
 }
 ```
 
-These repositories will store their respective entities in a single shared collection, using the entity type names to namespace the IDs and discriminate between each type. Therefore, these names should be considered part of the document schema, and would therefore require a data migration if they were changed as part of a domain refactoring.
+These repositories will store their respective types in a single shared collection, using the type names to discriminate between each type and namespace the IDs (for entities). Therefore, these names should be considered part of the document schema, and would require a data migration if they were changed as part of a domain refactoring.
