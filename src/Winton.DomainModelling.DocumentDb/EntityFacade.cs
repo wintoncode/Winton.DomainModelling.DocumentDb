@@ -12,9 +12,9 @@ namespace Winton.DomainModelling.DocumentDb
 {
     /// <inheritdoc />
     /// <summary>
-    ///     An abstraction layer over <see cref="Entity{TEntityId}" /> CRUD operations in DocumentDb. Allows multiple entity
-    ///     types to be transparently stored in one collection using a 'wrapper' document type with a type discriminator and
-    ///     namespaced ID.
+    ///     An abstraction layer over <see cref="Entity{TEntityId}" /> CRUD operations in DocumentDb. Allows multiple types to
+    ///     be transparently stored in one collection using a 'wrapper' document type with a type discriminator and namespaced
+    ///     ID.
     /// </summary>
     public sealed class EntityFacade : IEntityFacade
     {
@@ -32,7 +32,7 @@ namespace Winton.DomainModelling.DocumentDb
         {
             if (documentCollection.PartitionKey.Paths.Any())
             {
-                throw new NotSupportedException("Partitioned collections not supported.");
+                throw new NotSupportedException("Partitioned collections are not supported.");
             }
 
             _database = database;
@@ -136,7 +136,7 @@ namespace Winton.DomainModelling.DocumentDb
         {
             if (Equals(entity.Id, default(TEntityId)))
             {
-                throw new NotSupportedException("Upserting with default ID not supported.");
+                throw new NotSupportedException("Upserting with default ID is not supported.");
             }
 
             var document = new EntityDocument<TEntity, TEntityId>(entity);

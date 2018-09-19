@@ -244,7 +244,7 @@ namespace Winton.DomainModelling.DocumentDb
                 Func<Task> action = _entityFacade.Awaiting(ef => ef.Upsert<TestEntity, EntityId>(entity));
 
                 action.Should().Throw<NotSupportedException>()
-                      .WithMessage("Upserting with default ID not supported.");
+                      .WithMessage("Upserting with default ID is not supported.");
             }
 
             [Fact]

@@ -8,11 +8,11 @@ using Xunit;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    public class EntityFacadeTests
+    public class ValueObjectFacadeTests
     {
-        public sealed class Constructor : EntityFacadeTests
+        public sealed class Constructor : ValueObjectFacadeTests
         {
-            private static Action Constructing(Func<EntityFacade> ctor)
+            private static Action Constructing(Func<ValueObjectFacade> ctor)
             {
                 return () => ctor();
             }
@@ -22,7 +22,7 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 var documentCollection = new DocumentCollection();
 
-                Action constructing = Constructing(() => new EntityFacade(null, documentCollection, null));
+                Action constructing = Constructing(() => new ValueObjectFacade(null, documentCollection, null));
 
                 constructing.Should().NotThrow();
             }
@@ -35,7 +35,7 @@ namespace Winton.DomainModelling.DocumentDb
                     PartitionKey = new PartitionKeyDefinition { Paths = { "/id" } }
                 };
 
-                Action constructing = Constructing(() => new EntityFacade(null, documentCollection, null));
+                Action constructing = Constructing(() => new ValueObjectFacade(null, documentCollection, null));
 
                 constructing.Should().Throw<NotSupportedException>()
                             .WithMessage("Partitioned collections are not supported.");
