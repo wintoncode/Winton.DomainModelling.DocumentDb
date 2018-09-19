@@ -61,7 +61,7 @@ namespace Winton.DomainModelling.DocumentDb
 
             if (document == null)
             {
-                document = new ValueObjectDocument<TValueObject>(valueObject);
+                document = ValueObjectDocument<TValueObject>.Create(valueObject);
 
                 await _documentClient.CreateDocumentAsync(GetUri(), document);
             }

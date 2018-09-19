@@ -58,22 +58,11 @@ namespace Winton.DomainModelling.DocumentDb
             private void ShouldDefaultToNull()
             {
                 var valueObject = new TestValueObject("A");
-                var document = new ValueObjectDocument<TestValueObject>(valueObject);
+                ValueObjectDocument<TestValueObject> document = ValueObjectDocument<TestValueObject>.Create(valueObject);
 
                 string id = document.Id;
 
                 id.Should().BeNull();
-            }
-
-            [Fact]
-            private void ShouldReturnSetId()
-            {
-                var valueObject = new TestValueObject("A");
-                var document = new ValueObjectDocument<TestValueObject>(valueObject) { Id = "1" };
-
-                string id = document.Id;
-
-                id.Should().Be("1");
             }
 
             [Fact]
@@ -91,7 +80,7 @@ namespace Winton.DomainModelling.DocumentDb
             private void ShouldReturnEntityType()
             {
                 var valueObject = new TestValueObject("A");
-                var document = new ValueObjectDocument<TestValueObject>(valueObject);
+                ValueObjectDocument<TestValueObject> document = ValueObjectDocument<TestValueObject>.Create(valueObject);
 
                 string type = document.Type;
 
@@ -105,7 +94,7 @@ namespace Winton.DomainModelling.DocumentDb
             private void ShouldReturnValueObject()
             {
                 var expected = new TestValueObject("A");
-                var document = new ValueObjectDocument<TestValueObject>(expected);
+                ValueObjectDocument<TestValueObject> document = ValueObjectDocument<TestValueObject>.Create(expected);
 
                 TestValueObject valueObject = document.ValueObject;
 
