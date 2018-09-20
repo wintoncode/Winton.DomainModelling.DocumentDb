@@ -44,38 +44,6 @@ namespace Winton.DomainModelling.DocumentDb
             _documentClient.DeleteDatabaseAsync(_database.SelfLink).Wait();
         }
 
-        private struct OtherTestValueObject : IEquatable<OtherTestValueObject>
-        {
-            [JsonConstructor]
-            public OtherTestValueObject(int value)
-            {
-                Value = value;
-            }
-
-            // ReSharper disable once MemberCanBePrivate.Local
-            public int Value { get; }
-
-            public bool Equals(OtherTestValueObject other)
-            {
-                return Value == other.Value;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (obj is null)
-                {
-                    return false;
-                }
-
-                return obj is OtherTestValueObject o && Equals(o);
-            }
-
-            public override int GetHashCode()
-            {
-                return Value;
-            }
-        }
-
         private struct TestValueObject : IEquatable<TestValueObject>
         {
             [JsonConstructor]
@@ -188,6 +156,53 @@ namespace Winton.DomainModelling.DocumentDb
                         new TestValueObject(2),
                         new TestValueObject(3)
                     });
+            }
+        }
+
+        private class OtherTestValueObject : IEquatable<OtherTestValueObject>
+        {
+            [JsonConstructor]
+            public OtherTestValueObject(int value)
+            {
+                Value = value;
+            }
+
+            // ReSharper disable once MemberCanBePrivate.Local
+            public int Value { get; }
+
+            public bool Equals(OtherTestValueObject other)
+            {
+                if (other is null)
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(this, other))
+                {
+                    return true;
+                }
+
+                return Value == other.Value;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is null)
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(this, obj))
+                {
+                    return true;
+                }
+
+                return obj.GetType() == GetType() && Equals((OtherTestValueObject)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return Value;
             }
         }
     }
