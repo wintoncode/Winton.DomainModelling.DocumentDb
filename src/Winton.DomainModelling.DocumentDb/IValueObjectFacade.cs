@@ -19,7 +19,7 @@ namespace Winton.DomainModelling.DocumentDb
         /// <param name="valueObject">The Value Object to persist.</param>
         /// <returns>A Task.</returns>
         Task Create<TValueObject>(TValueObject valueObject)
-            where TValueObject : struct, IEquatable<TValueObject>;
+            where TValueObject : IEquatable<TValueObject>;
 
         /// <summary>
         ///     Delete a Value Object of a specified type.
@@ -28,7 +28,7 @@ namespace Winton.DomainModelling.DocumentDb
         /// <param name="valueObject">The Value Object to delete.</param>
         /// <returns>A Task.</returns>
         Task Delete<TValueObject>(TValueObject valueObject)
-            where TValueObject : struct, IEquatable<TValueObject>;
+            where TValueObject : IEquatable<TValueObject>;
 
         /// <summary>
         ///     Query Value Objects of a specified type.
@@ -36,6 +36,6 @@ namespace Winton.DomainModelling.DocumentDb
         /// <typeparam name="TValueObject">The type of the Value Objects.</typeparam>
         /// <returns>An <see cref="IQueryable{TValueObject}" />.</returns>
         IQueryable<TValueObject> Query<TValueObject>()
-            where TValueObject : struct, IEquatable<TValueObject>;
+            where TValueObject : IEquatable<TValueObject>;
     }
 }
