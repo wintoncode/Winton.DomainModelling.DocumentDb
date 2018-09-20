@@ -49,7 +49,7 @@ namespace Winton.DomainModelling.DocumentDb
         /// <param name="valueObject">The Value Object to persist.</param>
         /// <returns>A Task.</returns>
         public async Task Create<TValueObject>(TValueObject valueObject)
-            where TValueObject : struct, IEquatable<TValueObject>
+            where TValueObject : IEquatable<TValueObject>
         {
             ValueObjectDocument<TValueObject> document = Get(valueObject);
 
@@ -69,7 +69,7 @@ namespace Winton.DomainModelling.DocumentDb
         /// <param name="valueObject">The Value Object to delete.</param>
         /// <returns>A Task.</returns>
         public async Task Delete<TValueObject>(TValueObject valueObject)
-            where TValueObject : struct, IEquatable<TValueObject>
+            where TValueObject : IEquatable<TValueObject>
         {
             ValueObjectDocument<TValueObject> document = Get(valueObject);
 
@@ -86,13 +86,13 @@ namespace Winton.DomainModelling.DocumentDb
         /// <typeparam name="TValueObject">The type of the Value Objects.</typeparam>
         /// <returns>An <see cref="T:System.Linq.IQueryable`1" />.</returns>
         public IQueryable<TValueObject> Query<TValueObject>()
-            where TValueObject : struct, IEquatable<TValueObject>
+            where TValueObject : IEquatable<TValueObject>
         {
             return CreateValueObjectDocumentQuery<TValueObject>().Select(x => x.ValueObject);
         }
 
         private IQueryable<ValueObjectDocument<TValueObject>> CreateValueObjectDocumentQuery<TValueObject>()
-            where TValueObject : struct, IEquatable<TValueObject>
+            where TValueObject : IEquatable<TValueObject>
         {
             string valueObjectType = ValueObjectDocument<TValueObject>.GetDocumentType();
 
@@ -101,7 +101,7 @@ namespace Winton.DomainModelling.DocumentDb
         }
 
         private ValueObjectDocument<TValueObject> Get<TValueObject>(TValueObject valueObject)
-            where TValueObject : struct, IEquatable<TValueObject>
+            where TValueObject : IEquatable<TValueObject>
         {
             return CreateValueObjectDocumentQuery<TValueObject>()
                 .AsEnumerable()
