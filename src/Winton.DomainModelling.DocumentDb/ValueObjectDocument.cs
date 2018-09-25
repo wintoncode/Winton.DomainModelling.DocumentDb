@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 namespace Winton.DomainModelling.DocumentDb
 {
     internal sealed class ValueObjectDocument<TValueObject>
-        where TValueObject : struct, IEquatable<TValueObject>
+        where TValueObject : IEquatable<TValueObject>
     {
         [JsonConstructor]
         private ValueObjectDocument(TValueObject valueObject, string id)
