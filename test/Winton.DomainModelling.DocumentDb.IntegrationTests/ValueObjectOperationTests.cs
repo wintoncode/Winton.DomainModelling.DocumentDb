@@ -13,30 +13,31 @@ using Xunit;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    public class ValueObjectFacadeTests : IDisposable
+    public class ValueObjectOperationTests : IDisposable
     {
         private readonly Database _database;
         private readonly DocumentClient _documentClient;
-        private readonly ValueObjectFacade _valueObjectFacade;
+        private readonly DocumentCollection _documentCollection;
+        private readonly IValueObjectFacadeFactory _valueObjectFacadeFactory;
 
-        public ValueObjectFacadeTests()
+        public ValueObjectOperationTests()
         {
             string documentDbUri = Environment.GetEnvironmentVariable("DOCUMENT_DB_URI");
             string documentDbKey = Environment.GetEnvironmentVariable("DOCUMENT_DB_KEY");
 
-            var database = new Database { Id = nameof(ValueObjectFacadeTests) };
-            var documentCollection = new DocumentCollection { Id = nameof(ValueObjectFacadeTests) };
+            var database = new Database { Id = nameof(ValueObjectOperationTests) };
+            var documentCollection = new DocumentCollection { Id = nameof(ValueObjectOperationTests) };
 
             _documentClient = new DocumentClient(new Uri(documentDbUri), documentDbKey);
             _database = _documentClient.CreateDatabaseIfNotExistsAsync(database).Result.Resource;
 
             var requestOptions = new RequestOptions { OfferThroughput = 400 };
-            _documentClient.CreateDocumentCollectionIfNotExistsAsync(
+            _documentCollection = _documentClient.CreateDocumentCollectionIfNotExistsAsync(
                 _database.SelfLink,
                 documentCollection,
-                requestOptions).Wait();
+                requestOptions).Result.Resource;
 
-            _valueObjectFacade = new ValueObjectFacade(_database, documentCollection, _documentClient);
+            _valueObjectFacadeFactory = new ValueObjectFacadeFactory(_documentClient);
         }
 
         public void Dispose()
@@ -75,15 +76,18 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Create : ValueObjectFacadeTests
+        public sealed class Create : ValueObjectOperationTests
         {
             [Fact]
             private async Task ShouldCreateValueObjectIfItDoesNotExist()
             {
-                var valueObject = new TestValueObject(1);
-                await _valueObjectFacade.Create(valueObject);
+                IValueObjectFacade<TestValueObject> valueObjectFacade =
+                    _valueObjectFacadeFactory.Create<TestValueObject>(_database, _documentCollection);
 
-                IQueryable<TestValueObject> queriedValueObjects = _valueObjectFacade.Query<TestValueObject>();
+                var valueObject = new TestValueObject(1);
+                await valueObjectFacade.Create(valueObject);
+
+                IQueryable<TestValueObject> queriedValueObjects = valueObjectFacade.Query();
 
                 queriedValueObjects.Should().BeEquivalentTo(new List<TestValueObject> { valueObject });
             }
@@ -91,27 +95,33 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldNotCreateAnotherValueObjectIfItAlreadyExists()
             {
-                var valueObject = new TestValueObject(1);
-                await _valueObjectFacade.Create(valueObject);
-                await _valueObjectFacade.Create(valueObject);
+                IValueObjectFacade<TestValueObject> valueObjectFacade =
+                    _valueObjectFacadeFactory.Create<TestValueObject>(_database, _documentCollection);
 
-                IQueryable<TestValueObject> queriedValueObjects = _valueObjectFacade.Query<TestValueObject>();
+                var valueObject = new TestValueObject(1);
+                await valueObjectFacade.Create(valueObject);
+                await valueObjectFacade.Create(valueObject);
+
+                IQueryable<TestValueObject> queriedValueObjects = valueObjectFacade.Query();
 
                 queriedValueObjects.Should().BeEquivalentTo(new List<TestValueObject> { valueObject });
             }
         }
 
-        public sealed class Delete : ValueObjectFacadeTests
+        public sealed class Delete : ValueObjectOperationTests
         {
             [Fact]
             private async Task ShouldDeleteValueObject()
             {
+                IValueObjectFacade<TestValueObject> valueObjectFacade =
+                    _valueObjectFacadeFactory.Create<TestValueObject>(_database, _documentCollection);
+
                 var valueObject = new TestValueObject(1);
-                await _valueObjectFacade.Create(valueObject);
+                await valueObjectFacade.Create(valueObject);
 
-                await _valueObjectFacade.Delete(valueObject);
+                await valueObjectFacade.Delete(valueObject);
 
-                IQueryable<TestValueObject> queriedValueObjects = _valueObjectFacade.Query<TestValueObject>();
+                IQueryable<TestValueObject> queriedValueObjects = valueObjectFacade.Query();
 
                 queriedValueObjects.Should().BeEmpty();
             }
@@ -119,17 +129,25 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldNotThrowIfValueObjectDoesNotExist()
             {
+                IValueObjectFacade<TestValueObject> valueObjectFacade =
+                    _valueObjectFacadeFactory.Create<TestValueObject>(_database, _documentCollection);
+
                 var valueObject = new TestValueObject(1);
 
-                _valueObjectFacade.Awaiting(vof => vof.Delete(valueObject)).Should().NotThrow();
+                valueObjectFacade.Awaiting(vof => vof.Delete(valueObject)).Should().NotThrow();
             }
         }
 
-        public sealed class Query : ValueObjectFacadeTests
+        public sealed class Query : ValueObjectOperationTests
         {
             [Fact]
             private async Task ShouldQueryValueObjectsOfCorrectType()
             {
+                IValueObjectFacade<TestValueObject> valueObjectFacade =
+                    _valueObjectFacadeFactory.Create<TestValueObject>(_database, _documentCollection);
+                IValueObjectFacade<OtherTestValueObject> otherValueObjectFacade =
+                    _valueObjectFacadeFactory.Create<OtherTestValueObject>(_database, _documentCollection);
+
                 var valueObjects = new List<TestValueObject>
                 {
                     new TestValueObject(2),
@@ -144,11 +162,11 @@ namespace Winton.DomainModelling.DocumentDb
                     new OtherTestValueObject(1)
                 };
 
-                await Task.WhenAll(valueObjects.Select(_valueObjectFacade.Create));
-                await Task.WhenAll(valueObjectsOfDifferentType.Select(_valueObjectFacade.Create));
+                await Task.WhenAll(valueObjects.Select(valueObjectFacade.Create));
+                await Task.WhenAll(valueObjectsOfDifferentType.Select(otherValueObjectFacade.Create));
 
-                IQueryable<TestValueObject> queriedValueObjects = _valueObjectFacade.Query<TestValueObject>()
-                                                                                    .Where(vo => vo.Value > 1);
+                IQueryable<TestValueObject> queriedValueObjects = valueObjectFacade.Query()
+                                                                                   .Where(vo => vo.Value > 1);
 
                 queriedValueObjects.Should().BeEquivalentTo(
                     new List<TestValueObject>

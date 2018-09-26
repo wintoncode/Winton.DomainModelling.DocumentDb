@@ -12,7 +12,7 @@ namespace Winton.DomainModelling.DocumentDb
     {
         public sealed class Constructor : EntityFacadeTests
         {
-            private static Action Constructing(Func<EntityFacade> ctor)
+            private static Action Constructing(Func<EntityFacade<TestEntity, string>> ctor)
             {
                 return () => ctor();
             }
@@ -22,7 +22,8 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 var documentCollection = new DocumentCollection();
 
-                Action constructing = Constructing(() => new EntityFacade(null, documentCollection, null));
+                Action constructing =
+                    Constructing(() => new EntityFacade<TestEntity, string>(null, documentCollection, null));
 
                 constructing.Should().NotThrow();
             }
@@ -35,10 +36,20 @@ namespace Winton.DomainModelling.DocumentDb
                     PartitionKey = new PartitionKeyDefinition { Paths = { "/id" } }
                 };
 
-                Action constructing = Constructing(() => new EntityFacade(null, documentCollection, null));
+                Action constructing =
+                    Constructing(() => new EntityFacade<TestEntity, string>(null, documentCollection, null));
 
                 constructing.Should().Throw<NotSupportedException>()
                             .WithMessage("Partitioned collections are not supported.");
+            }
+        }
+
+        // ReSharper disable once ClassNeverInstantiated.Local
+        private sealed class TestEntity : Entity<string>
+        {
+            public TestEntity(string id)
+                : base(id)
+            {
             }
         }
     }

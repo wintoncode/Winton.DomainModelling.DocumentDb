@@ -10,32 +10,28 @@ namespace Winton.DomainModelling.DocumentDb
     /// <summary>
     ///     An abstraction layer over Value Object operations in DocumentDb.
     /// </summary>
-    public interface IValueObjectFacade
+    /// <typeparam name="TValueObject">The type of the Value Object.</typeparam>
+    public interface IValueObjectFacade<TValueObject>
+        where TValueObject : IEquatable<TValueObject>
     {
         /// <summary>
         ///     Create a Value Object of a specified type.
         /// </summary>
-        /// <typeparam name="TValueObject">The type of the Value Object.</typeparam>
         /// <param name="valueObject">The Value Object to persist.</param>
         /// <returns>A Task.</returns>
-        Task Create<TValueObject>(TValueObject valueObject)
-            where TValueObject : IEquatable<TValueObject>;
+        Task Create(TValueObject valueObject);
 
         /// <summary>
         ///     Delete a Value Object of a specified type.
         /// </summary>
-        /// <typeparam name="TValueObject">The type of the Value Object.</typeparam>
         /// <param name="valueObject">The Value Object to delete.</param>
         /// <returns>A Task.</returns>
-        Task Delete<TValueObject>(TValueObject valueObject)
-            where TValueObject : IEquatable<TValueObject>;
+        Task Delete(TValueObject valueObject);
 
         /// <summary>
         ///     Query Value Objects of a specified type.
         /// </summary>
-        /// <typeparam name="TValueObject">The type of the Value Objects.</typeparam>
         /// <returns>An <see cref="IQueryable{TValueObject}" />.</returns>
-        IQueryable<TValueObject> Query<TValueObject>()
-            where TValueObject : IEquatable<TValueObject>;
+        IQueryable<TValueObject> Query();
     }
 }
