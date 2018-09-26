@@ -14,20 +14,20 @@ using Xunit;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    public class EntityFacadeFactoryTests : IDisposable
+    public class EntityOperationTests : IDisposable
     {
         private readonly Database _database;
         private readonly DocumentClient _documentClient;
         private readonly DocumentCollection _documentCollection;
         private readonly IEntityFacadeFactory _entityFacadeFactory;
 
-        public EntityFacadeFactoryTests()
+        public EntityOperationTests()
         {
             string documentDbUri = Environment.GetEnvironmentVariable("DOCUMENT_DB_URI");
             string documentDbKey = Environment.GetEnvironmentVariable("DOCUMENT_DB_KEY");
 
-            var database = new Database { Id = nameof(EntityFacadeFactoryTests) };
-            var documentCollection = new DocumentCollection { Id = nameof(EntityFacadeFactoryTests) };
+            var database = new Database { Id = nameof(EntityOperationTests) };
+            var documentCollection = new DocumentCollection { Id = nameof(EntityOperationTests) };
 
             _documentClient = new DocumentClient(new Uri(documentDbUri), documentDbKey);
             _database = _documentClient.CreateDatabaseIfNotExistsAsync(database).Result.Resource;
@@ -87,7 +87,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Create : EntityFacadeFactoryTests
+        public sealed class Create : EntityOperationTests
         {
             [Fact]
             private async Task ShouldReturnCreatedEntityIfIdSet()
@@ -128,7 +128,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Delete : EntityFacadeFactoryTests
+        public sealed class Delete : EntityOperationTests
         {
             [Fact]
             private async Task ShouldDeleteEntity()
@@ -147,7 +147,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Query : EntityFacadeFactoryTests
+        public sealed class Query : EntityOperationTests
         {
             [Fact]
             private async Task ShouldQueryEntitiesOfCorrectType()
@@ -186,7 +186,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Read : EntityFacadeFactoryTests
+        public sealed class Read : EntityOperationTests
         {
             [Fact]
             private async Task ShouldReturnEntityById()
@@ -230,7 +230,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Upsert : EntityFacadeFactoryTests
+        public sealed class Upsert : EntityOperationTests
         {
             [Fact]
             private async Task ShouldCreateEntity()

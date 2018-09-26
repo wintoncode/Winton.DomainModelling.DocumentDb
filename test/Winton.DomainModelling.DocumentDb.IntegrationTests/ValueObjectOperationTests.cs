@@ -13,20 +13,20 @@ using Xunit;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    public class ValueObjectFacadeFactoryTests : IDisposable
+    public class ValueObjectOperationTests : IDisposable
     {
         private readonly Database _database;
         private readonly DocumentClient _documentClient;
         private readonly DocumentCollection _documentCollection;
         private readonly IValueObjectFacadeFactory _valueObjectFacadeFactory;
 
-        public ValueObjectFacadeFactoryTests()
+        public ValueObjectOperationTests()
         {
             string documentDbUri = Environment.GetEnvironmentVariable("DOCUMENT_DB_URI");
             string documentDbKey = Environment.GetEnvironmentVariable("DOCUMENT_DB_KEY");
 
-            var database = new Database { Id = nameof(ValueObjectFacadeFactoryTests) };
-            var documentCollection = new DocumentCollection { Id = nameof(ValueObjectFacadeFactoryTests) };
+            var database = new Database { Id = nameof(ValueObjectOperationTests) };
+            var documentCollection = new DocumentCollection { Id = nameof(ValueObjectOperationTests) };
 
             _documentClient = new DocumentClient(new Uri(documentDbUri), documentDbKey);
             _database = _documentClient.CreateDatabaseIfNotExistsAsync(database).Result.Resource;
@@ -76,7 +76,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Create : ValueObjectFacadeFactoryTests
+        public sealed class Create : ValueObjectOperationTests
         {
             [Fact]
             private async Task ShouldCreateValueObjectIfItDoesNotExist()
@@ -108,7 +108,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Delete : ValueObjectFacadeFactoryTests
+        public sealed class Delete : ValueObjectOperationTests
         {
             [Fact]
             private async Task ShouldDeleteValueObject()
@@ -138,7 +138,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Query : ValueObjectFacadeFactoryTests
+        public sealed class Query : ValueObjectOperationTests
         {
             [Fact]
             private async Task ShouldQueryValueObjectsOfCorrectType()
