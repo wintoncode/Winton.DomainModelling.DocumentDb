@@ -10,24 +10,14 @@ using Microsoft.Azure.Documents.Client;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    /// <inheritdoc />
-    /// <summary>
-    ///     An abstraction layer over <see cref="Entity{TEntityId}" /> CRUD operations in DocumentDb. Allows multiple types to
-    ///     be transparently stored in one collection using a 'wrapper' document type with a type discriminator and namespaced
-    ///     ID.
-    /// </summary>
-    public sealed class EntityFacade : IEntityFacade
+    internal sealed class EntityFacade<TEntity, TEntityId> : IEntityFacade<TEntity, TEntityId>
+        where TEntity : Entity<TEntityId>
+        where TEntityId : IEquatable<TEntityId>
     {
         private readonly Database _database;
         private readonly IDocumentClient _documentClient;
         private readonly DocumentCollection _documentCollection;
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="EntityFacade" /> class.
-        /// </summary>
-        /// <param name="database">The DocumentDb database.</param>
-        /// <param name="documentCollection">The DocumentDb collection. Partitioned collections are not supported.</param>
-        /// <param name="documentClient">A document client implementation.</param>
         public EntityFacade(Database database, DocumentCollection documentCollection, IDocumentClient documentClient)
         {
             if (documentCollection.PartitionKey.Paths.Any())
@@ -40,18 +30,7 @@ namespace Winton.DomainModelling.DocumentDb
             _documentClient = documentClient;
         }
 
-        /// <inheritdoc />
-        /// <summary>
-        ///     Create an <see cref="T:Winton.DomainModelling.Entity`1" /> of a specified type. Supports automatic ID generation
-        ///     for <see cref="T:System.String" />-serializable ID types, otherwise IDs must be set before creating.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TEntityId">The ID type of the entity.</typeparam>
-        /// <param name="entity">The <see cref="T:Winton.DomainModelling.Entity`1" /> to persist.</param>
-        /// <returns>The created <see cref="T:Winton.DomainModelling.Entity`1" />.</returns>
-        public async Task<TEntity> Create<TEntity, TEntityId>(TEntity entity)
-            where TEntity : Entity<TEntityId>
-            where TEntityId : IEquatable<TEntityId>
+        public async Task<TEntity> Create(TEntity entity)
         {
             var document = new EntityDocument<TEntity, TEntityId>(entity.WithId<TEntity, TEntityId>());
 
@@ -62,31 +41,12 @@ namespace Winton.DomainModelling.DocumentDb
             return responseDocument.Entity;
         }
 
-        /// <inheritdoc />
-        /// <summary>
-        ///     Delete an <see cref="T:Winton.DomainModelling.Entity`1" /> of a specified type by ID.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TEntityId">The ID type of the entity.</typeparam>
-        /// <param name="id">The ID of the <see cref="T:Winton.DomainModelling.Entity`1" /> to delete.</param>
-        /// <returns>A Task.</returns>
-        public async Task Delete<TEntity, TEntityId>(TEntityId id)
-            where TEntity : Entity<TEntityId>
-            where TEntityId : IEquatable<TEntityId>
+        public async Task Delete(TEntityId id)
         {
-            await _documentClient.DeleteDocumentAsync(GetUri<TEntity, TEntityId>(id));
+            await _documentClient.DeleteDocumentAsync(GetUri(id));
         }
 
-        /// <inheritdoc />
-        /// <summary>
-        ///     Query <see cref="T:Winton.DomainModelling.Entity`1" /> instances of a specified type.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TEntityId">The ID type of the entity.</typeparam>
-        /// <returns>An <see cref="T:System.Linq.IQueryable`1" />.</returns>
-        public IQueryable<TEntity> Query<TEntity, TEntityId>()
-            where TEntity : Entity<TEntityId>
-            where TEntityId : IEquatable<TEntityId>
+        public IQueryable<TEntity> Query()
         {
             string entityType = EntityDocument<TEntity, TEntityId>.GetDocumentType();
 
@@ -95,22 +55,11 @@ namespace Winton.DomainModelling.DocumentDb
                                   .Select(x => x.Entity);
         }
 
-        /// <inheritdoc />
-        /// <summary>
-        ///     Read an <see cref="T:Winton.DomainModelling.Entity`1" /> of a specified type by ID.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TEntityId">The ID type of the entity.</typeparam>
-        /// <param name="id">The ID of the <see cref="T:Winton.DomainModelling.Entity`1" /> to read.</param>
-        /// <returns>The <see cref="T:Winton.DomainModelling.Entity`1" /> with the given ID, if it exists, otherwise null.</returns>
-        public async Task<TEntity> Read<TEntity, TEntityId>(TEntityId id)
-            where TEntity : Entity<TEntityId>
-            where TEntityId : IEquatable<TEntityId>
+        public async Task<TEntity> Read(TEntityId id)
         {
             try
             {
-                ResourceResponse<Document> response =
-                    await _documentClient.ReadDocumentAsync(GetUri<TEntity, TEntityId>(id));
+                ResourceResponse<Document> response = await _documentClient.ReadDocumentAsync(GetUri(id));
 
                 EntityDocument<TEntity, TEntityId> responseDocument = (dynamic)response.Resource;
 
@@ -122,17 +71,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        /// <inheritdoc />
-        /// <summary>
-        ///     Upsert an <see cref="T:Winton.DomainModelling.Entity`1" /> of a specified type. The ID must be set.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TEntityId">The ID type of the entity.</typeparam>
-        /// <param name="entity">The <see cref="T:Winton.DomainModelling.Entity`1" /> to upsert.</param>
-        /// <returns>The upserted <see cref="T:Winton.DomainModelling.Entity`1" />.</returns>
-        public async Task<TEntity> Upsert<TEntity, TEntityId>(TEntity entity)
-            where TEntity : Entity<TEntityId>
-            where TEntityId : IEquatable<TEntityId>
+        public async Task<TEntity> Upsert(TEntity entity)
         {
             if (Equals(entity.Id, default(TEntityId)))
             {
@@ -153,9 +92,7 @@ namespace Winton.DomainModelling.DocumentDb
             return UriFactory.CreateDocumentCollectionUri(_database.Id, _documentCollection.Id);
         }
 
-        private Uri GetUri<TEntity, TEntityId>(TEntityId id)
-            where TEntity : Entity<TEntityId>
-            where TEntityId : IEquatable<TEntityId>
+        private Uri GetUri(TEntityId id)
         {
             return UriFactory.CreateDocumentUri(
                 _database.Id,

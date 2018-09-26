@@ -9,23 +9,13 @@ using Microsoft.Azure.Documents.Client;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    /// <inheritdoc />
-    /// <summary>
-    ///     An abstraction layer over Value Object operations in DocumentDb. Allows multiple types to be transparently stored
-    ///     in one collection using a 'wrapper' document type with a type discriminator.
-    /// </summary>
-    public sealed class ValueObjectFacade : IValueObjectFacade
+    internal sealed class ValueObjectFacade<TValueObject> : IValueObjectFacade<TValueObject>
+        where TValueObject : IEquatable<TValueObject>
     {
         private readonly Database _database;
         private readonly IDocumentClient _documentClient;
         private readonly DocumentCollection _documentCollection;
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ValueObjectFacade" /> class.
-        /// </summary>
-        /// <param name="database">The DocumentDb database.</param>
-        /// <param name="documentCollection">The DocumentDb collection. Partitioned collections are not supported.</param>
-        /// <param name="documentClient">A document client implementation.</param>
         public ValueObjectFacade(
             Database database,
             DocumentCollection documentCollection,
@@ -41,15 +31,7 @@ namespace Winton.DomainModelling.DocumentDb
             _documentClient = documentClient;
         }
 
-        /// <inheritdoc />
-        /// <summary>
-        ///     Create a Value Object of a specified type.
-        /// </summary>
-        /// <typeparam name="TValueObject">The type of the Value Object.</typeparam>
-        /// <param name="valueObject">The Value Object to persist.</param>
-        /// <returns>A Task.</returns>
-        public async Task Create<TValueObject>(TValueObject valueObject)
-            where TValueObject : IEquatable<TValueObject>
+        public async Task Create(TValueObject valueObject)
         {
             ValueObjectDocument<TValueObject> document = Get(valueObject);
 
@@ -61,15 +43,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        /// <inheritdoc />
-        /// <summary>
-        ///     Delete a Value Object of a specified type.
-        /// </summary>
-        /// <typeparam name="TValueObject">The type of the Value Object.</typeparam>
-        /// <param name="valueObject">The Value Object to delete.</param>
-        /// <returns>A Task.</returns>
-        public async Task Delete<TValueObject>(TValueObject valueObject)
-            where TValueObject : IEquatable<TValueObject>
+        public async Task Delete(TValueObject valueObject)
         {
             ValueObjectDocument<TValueObject> document = Get(valueObject);
 
@@ -79,20 +53,12 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        /// <inheritdoc />
-        /// <summary>
-        ///     Query Value Objects of a specified type.
-        /// </summary>
-        /// <typeparam name="TValueObject">The type of the Value Objects.</typeparam>
-        /// <returns>An <see cref="T:System.Linq.IQueryable`1" />.</returns>
-        public IQueryable<TValueObject> Query<TValueObject>()
-            where TValueObject : IEquatable<TValueObject>
+        public IQueryable<TValueObject> Query()
         {
-            return CreateValueObjectDocumentQuery<TValueObject>().Select(x => x.ValueObject);
+            return CreateValueObjectDocumentQuery().Select(x => x.ValueObject);
         }
 
-        private IQueryable<ValueObjectDocument<TValueObject>> CreateValueObjectDocumentQuery<TValueObject>()
-            where TValueObject : IEquatable<TValueObject>
+        private IQueryable<ValueObjectDocument<TValueObject>> CreateValueObjectDocumentQuery()
         {
             string valueObjectType = ValueObjectDocument<TValueObject>.GetDocumentType();
 
@@ -100,10 +66,9 @@ namespace Winton.DomainModelling.DocumentDb
                                   .Where(x => x.Type == valueObjectType);
         }
 
-        private ValueObjectDocument<TValueObject> Get<TValueObject>(TValueObject valueObject)
-            where TValueObject : IEquatable<TValueObject>
+        private ValueObjectDocument<TValueObject> Get(TValueObject valueObject)
         {
-            return CreateValueObjectDocumentQuery<TValueObject>()
+            return CreateValueObjectDocumentQuery()
                 .AsEnumerable()
                 .SingleOrDefault(x => x.ValueObject.Equals(valueObject));
         }
