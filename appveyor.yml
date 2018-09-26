@@ -10,9 +10,7 @@ configuration:
     - Release
 skip_tags: true
 install:
-    - ps: Start-FileDownload "https://aka.ms/cosmosdb-emulator" -FileName "C:\Azure Cosmos DB.Emulator.msi"
-    - cmd: cmd /c start /wait msiexec /i "C:\Azure Cosmos DB.Emulator.msi" /qn /quiet /norestart /log install.log
-    - ps: Start-Process "C:\Program Files\Azure Cosmos DB Emulator\CosmosDB.Emulator.exe" -ArgumentList "/NoExplorer","/NoUI"
+    - ps: Start-Process "C:\Program Files\Azure Cosmos DB Emulator\CosmosDB.Emulator.exe" -ArgumentList "/NoExplorer","/NoUI","/NoFirewall"
     - ps: Start-Sleep -s 15
 before_build:
     - dotnet restore
