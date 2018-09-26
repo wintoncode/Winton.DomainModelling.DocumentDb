@@ -185,9 +185,7 @@ internal sealed class TransactionRepository : ITransactionRepository
 
     public IEnumerable<Transaction> GetAllSentBy(AccountId accountId)
     {
-        return _entityFacade.Query()
-                            .Where(t => t.Sender == accountId)
-                            .AsEnumerable();
+        return _entityFacade.Query(t => t.Sender == accountId);
     }
 
     ...
@@ -209,8 +207,7 @@ internal sealed class AccountTypeRepository : IAccountTypeRepository
 
     public IEnumerable<AccountType> GetAll()
     {
-        return _valueObjectFacade.Query()
-                                 .AsEnumerable();
+        return _valueObjectFacade.Query();
     }
 
     ...

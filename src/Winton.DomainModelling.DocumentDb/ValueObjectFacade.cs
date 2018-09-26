@@ -2,7 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
@@ -53,9 +55,12 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public IQueryable<TValueObject> Query()
+        public IEnumerable<TValueObject> Query(Expression<Func<TValueObject, bool>> predicate = null)
         {
-            return CreateValueObjectDocumentQuery().Select(x => x.ValueObject);
+            return CreateValueObjectDocumentQuery()
+                .Select(x => x.ValueObject)
+                .Where(predicate ?? (x => true))
+                .AsEnumerable();
         }
 
         private IQueryable<ValueObjectDocument<TValueObject>> CreateValueObjectDocumentQuery()
