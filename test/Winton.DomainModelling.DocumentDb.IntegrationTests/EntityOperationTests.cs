@@ -174,8 +174,7 @@ namespace Winton.DomainModelling.DocumentDb
                 await Task.WhenAll(entities.Select(entityFacade.Create));
                 await Task.WhenAll(entitiesOfDifferentType.Select(otherEntityFacade.Create));
 
-                IQueryable<TestEntity> queriedEntities = entityFacade.Query()
-                                                                     .Where(e => e.Value > 1);
+                IEnumerable<TestEntity> queriedEntities = entityFacade.Query(e => e.Value > 1);
 
                 queriedEntities.Should().BeEquivalentTo(
                     new List<TestEntity>

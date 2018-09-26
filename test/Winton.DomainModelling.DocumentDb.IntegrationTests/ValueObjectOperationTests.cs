@@ -87,7 +87,7 @@ namespace Winton.DomainModelling.DocumentDb
                 var valueObject = new TestValueObject(1);
                 await valueObjectFacade.Create(valueObject);
 
-                IQueryable<TestValueObject> queriedValueObjects = valueObjectFacade.Query();
+                IEnumerable<TestValueObject> queriedValueObjects = valueObjectFacade.Query();
 
                 queriedValueObjects.Should().BeEquivalentTo(new List<TestValueObject> { valueObject });
             }
@@ -102,7 +102,7 @@ namespace Winton.DomainModelling.DocumentDb
                 await valueObjectFacade.Create(valueObject);
                 await valueObjectFacade.Create(valueObject);
 
-                IQueryable<TestValueObject> queriedValueObjects = valueObjectFacade.Query();
+                IEnumerable<TestValueObject> queriedValueObjects = valueObjectFacade.Query();
 
                 queriedValueObjects.Should().BeEquivalentTo(new List<TestValueObject> { valueObject });
             }
@@ -121,7 +121,7 @@ namespace Winton.DomainModelling.DocumentDb
 
                 await valueObjectFacade.Delete(valueObject);
 
-                IQueryable<TestValueObject> queriedValueObjects = valueObjectFacade.Query();
+                IEnumerable<TestValueObject> queriedValueObjects = valueObjectFacade.Query();
 
                 queriedValueObjects.Should().BeEmpty();
             }
@@ -165,8 +165,7 @@ namespace Winton.DomainModelling.DocumentDb
                 await Task.WhenAll(valueObjects.Select(valueObjectFacade.Create));
                 await Task.WhenAll(valueObjectsOfDifferentType.Select(otherValueObjectFacade.Create));
 
-                IQueryable<TestValueObject> queriedValueObjects = valueObjectFacade.Query()
-                                                                                   .Where(vo => vo.Value > 1);
+                IEnumerable<TestValueObject> queriedValueObjects = valueObjectFacade.Query(vo => vo.Value > 1);
 
                 queriedValueObjects.Should().BeEquivalentTo(
                     new List<TestValueObject>

@@ -2,7 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Winton.DomainModelling.DocumentDb
@@ -32,10 +33,13 @@ namespace Winton.DomainModelling.DocumentDb
         Task Delete(TEntityId id);
 
         /// <summary>
-        ///     Query <see cref="Entity{TEntityId}" /> instances of a specified type.
+        ///     Query <see cref="Entity{TEntityId}" /> instances of a specified type. If a predicate expression is supplied, it
+        ///     will be evaluated directly by the DocumentDb query provider (database-side), so must be supported by the LINQ to
+        ///     SQL API.
         /// </summary>
-        /// <returns>An <see cref="IQueryable{TEntity}" />.</returns>
-        IQueryable<TEntity> Query();
+        /// <param name="predicate">An optional predicate to filter the results.</param>
+        /// <returns>An <see cref="IEnumerable{TEntity}" />.</returns>
+        IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> predicate = null);
 
         /// <summary>
         ///     Read an <see cref="Entity{TEntityId}" /> of a specified type by ID.

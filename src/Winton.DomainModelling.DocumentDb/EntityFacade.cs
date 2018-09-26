@@ -2,7 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Azure.Documents;
@@ -46,13 +48,15 @@ namespace Winton.DomainModelling.DocumentDb
             await _documentClient.DeleteDocumentAsync(GetUri(id));
         }
 
-        public IQueryable<TEntity> Query()
+        public IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> predicate = null)
         {
             string entityType = EntityDocument<TEntity, TEntityId>.GetDocumentType();
 
             return _documentClient.CreateDocumentQuery<EntityDocument<TEntity, TEntityId>>(GetUri())
                                   .Where(x => x.Type == entityType)
-                                  .Select(x => x.Entity);
+                                  .Select(x => x.Entity)
+                                  .Where(predicate ?? (x => true))
+                                  .AsEnumerable();
         }
 
         public async Task<TEntity> Read(TEntityId id)
