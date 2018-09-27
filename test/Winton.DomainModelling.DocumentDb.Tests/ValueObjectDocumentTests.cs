@@ -10,6 +10,18 @@ namespace Winton.DomainModelling.DocumentDb
 {
     public class ValueObjectDocumentTests
     {
+        private struct TestDto
+        {
+            public TestDto(string value)
+            {
+                Value = value;
+            }
+
+            // ReSharper disable once MemberCanBePrivate.Local
+            // ReSharper disable once UnusedAutoPropertyAccessor.Local
+            public string Value { get; }
+        }
+
         private struct TestValueObject : IEquatable<TestValueObject>
         {
             public TestValueObject(string value)
@@ -41,12 +53,34 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
+        public sealed class Dto : ValueObjectDocumentTests
+        {
+            [Fact]
+            private void ShouldReturnValueObject()
+            {
+                var expected = new TestDto("A");
+                var document = new ValueObjectDocument<TestValueObject, TestDto>(new TestValueObject("A"), expected);
+
+                TestDto dto = document.Dto;
+
+                dto.Should().Be(expected);
+            }
+
+            [Fact]
+            private void ShouldSerializePropertyNameAsValueObject()
+            {
+                typeof(ValueObjectDocument<TestValueObject, TestDto>)
+                    .GetProperty(nameof(ValueObjectDocument<TestValueObject, TestDto>.Dto))
+                    .Should().BeDecoratedWith<JsonPropertyAttribute>(a => a.PropertyName == "ValueObject");
+            }
+        }
+
         public sealed class GetDocumentType : ValueObjectDocumentTests
         {
             [Fact]
             private void ShouldReturnValueObjectType()
             {
-                string type = ValueObjectDocument<TestValueObject>.GetDocumentType();
+                string type = ValueObjectDocument<TestValueObject, TestDto>.GetDocumentType();
 
                 type.Should().Be("TestValueObject");
             }
@@ -57,8 +91,9 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldDefaultToNull()
             {
-                var valueObject = new TestValueObject("A");
-                ValueObjectDocument<TestValueObject> document = ValueObjectDocument<TestValueObject>.Create(valueObject);
+                var document = new ValueObjectDocument<TestValueObject, TestDto>(
+                    new TestValueObject("A"),
+                    new TestDto("A"));
 
                 string id = document.Id;
 
@@ -68,8 +103,8 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldSerializePropertyNameAsLowercase()
             {
-                typeof(ValueObjectDocument<TestValueObject>)
-                    .GetProperty(nameof(ValueObjectDocument<TestValueObject>.Id))
+                typeof(ValueObjectDocument<TestValueObject, TestDto>)
+                    .GetProperty(nameof(ValueObjectDocument<TestValueObject, TestDto>.Id))
                     .Should().BeDecoratedWith<JsonPropertyAttribute>(a => a.PropertyName == "id");
             }
         }
@@ -79,26 +114,13 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldReturnValueObjectType()
             {
-                var valueObject = new TestValueObject("A");
-                ValueObjectDocument<TestValueObject> document = ValueObjectDocument<TestValueObject>.Create(valueObject);
+                var document = new ValueObjectDocument<TestValueObject, TestDto>(
+                    new TestValueObject("A"),
+                    new TestDto("A"));
 
                 string type = document.Type;
 
                 type.Should().Be("TestValueObject");
-            }
-        }
-
-        public sealed class ValueObject : ValueObjectDocumentTests
-        {
-            [Fact]
-            private void ShouldReturnValueObject()
-            {
-                var expected = new TestValueObject("A");
-                ValueObjectDocument<TestValueObject> document = ValueObjectDocument<TestValueObject>.Create(expected);
-
-                TestValueObject valueObject = document.ValueObject;
-
-                valueObject.Should().Be(expected);
             }
         }
     }

@@ -12,15 +12,22 @@ using Microsoft.Azure.Documents.Client;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    internal sealed class EntityFacade<TEntity, TEntityId> : IEntityFacade<TEntity, TEntityId>
+    internal class EntityFacade<TEntity, TEntityId, TDto> : IEntityFacade<TEntity, TEntityId, TDto>
         where TEntity : Entity<TEntityId>
         where TEntityId : IEquatable<TEntityId>
     {
         private readonly Database _database;
         private readonly IDocumentClient _documentClient;
         private readonly DocumentCollection _documentCollection;
+        private readonly Func<TEntity, TDto> _dtoMapping;
+        private readonly Func<TDto, TEntity> _entityMapping;
 
-        public EntityFacade(Database database, DocumentCollection documentCollection, IDocumentClient documentClient)
+        public EntityFacade(
+            Database database,
+            DocumentCollection documentCollection,
+            IDocumentClient documentClient,
+            Func<TEntity, TDto> dtoMapping,
+            Func<TDto, TEntity> entityMapping)
         {
             if (documentCollection.PartitionKey.Paths.Any())
             {
@@ -30,17 +37,20 @@ namespace Winton.DomainModelling.DocumentDb
             _database = database;
             _documentCollection = documentCollection;
             _documentClient = documentClient;
+            _dtoMapping = dtoMapping;
+            _entityMapping = entityMapping;
         }
 
         public async Task<TEntity> Create(TEntity entity)
         {
-            var document = new EntityDocument<TEntity, TEntityId>(entity.WithId<TEntity, TEntityId>());
+            TEntity entityWithId = entity.WithId<TEntity, TEntityId>();
+
+            var document = new EntityDocument<TEntity, TEntityId, TDto>(entityWithId, _dtoMapping(entityWithId));
 
             ResourceResponse<Document> response = await _documentClient.CreateDocumentAsync(GetUri(), document);
+            EntityDocument<TEntity, TEntityId, TDto> responseDocument = (dynamic)response.Resource;
 
-            EntityDocument<TEntity, TEntityId> responseDocument = (dynamic)response.Resource;
-
-            return responseDocument.Entity;
+            return _entityMapping(responseDocument.Dto);
         }
 
         public async Task Delete(TEntityId id)
@@ -48,15 +58,16 @@ namespace Winton.DomainModelling.DocumentDb
             await _documentClient.DeleteDocumentAsync(GetUri(id));
         }
 
-        public IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> predicate = null)
+        public IEnumerable<TEntity> Query(Expression<Func<TDto, bool>> predicate = null)
         {
-            string entityType = EntityDocument<TEntity, TEntityId>.GetDocumentType();
+            string entityType = EntityDocument<TEntity, TEntityId, TDto>.GetDocumentType();
 
-            return _documentClient.CreateDocumentQuery<EntityDocument<TEntity, TEntityId>>(GetUri())
+            return _documentClient.CreateDocumentQuery<EntityDocument<TEntity, TEntityId, TDto>>(GetUri())
                                   .Where(x => x.Type == entityType)
-                                  .Select(x => x.Entity)
+                                  .Select(x => x.Dto)
                                   .Where(predicate ?? (x => true))
-                                  .AsEnumerable();
+                                  .AsEnumerable()
+                                  .Select(x => _entityMapping(x));
         }
 
         public async Task<TEntity> Read(TEntityId id)
@@ -64,10 +75,9 @@ namespace Winton.DomainModelling.DocumentDb
             try
             {
                 ResourceResponse<Document> response = await _documentClient.ReadDocumentAsync(GetUri(id));
+                EntityDocument<TEntity, TEntityId, TDto> responseDocument = (dynamic)response.Resource;
 
-                EntityDocument<TEntity, TEntityId> responseDocument = (dynamic)response.Resource;
-
-                return responseDocument.Entity;
+                return _entityMapping(responseDocument.Dto);
             }
             catch (DocumentClientException dce) when (dce.StatusCode == HttpStatusCode.NotFound)
             {
@@ -82,13 +92,12 @@ namespace Winton.DomainModelling.DocumentDb
                 throw new NotSupportedException("Upserting with default ID is not supported.");
             }
 
-            var document = new EntityDocument<TEntity, TEntityId>(entity);
+            var document = new EntityDocument<TEntity, TEntityId, TDto>(entity, _dtoMapping(entity));
 
             ResourceResponse<Document> response = await _documentClient.UpsertDocumentAsync(GetUri(), document);
+            EntityDocument<TEntity, TEntityId, TDto> responseDocument = (dynamic)response.Resource;
 
-            EntityDocument<TEntity, TEntityId> responseDocument = (dynamic)response.Resource;
-
-            return responseDocument.Entity;
+            return _entityMapping(responseDocument.Dto);
         }
 
         private Uri GetUri()
@@ -101,7 +110,7 @@ namespace Winton.DomainModelling.DocumentDb
             return UriFactory.CreateDocumentUri(
                 _database.Id,
                 _documentCollection.Id,
-                EntityDocument<TEntity, TEntityId>.GetDocumentId(id));
+                EntityDocument<TEntity, TEntityId, TDto>.GetDocumentId(id));
         }
     }
 }

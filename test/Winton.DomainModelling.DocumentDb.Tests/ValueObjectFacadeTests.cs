@@ -12,7 +12,7 @@ namespace Winton.DomainModelling.DocumentDb
     {
         public sealed class Constructor : ValueObjectFacadeTests
         {
-            private static Action Constructing(Func<ValueObjectFacade<string>> ctor)
+            private static Action Constructing(Func<ValueObjectFacade<string, string>> ctor)
             {
                 return () => ctor();
             }
@@ -22,7 +22,9 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 var documentCollection = new DocumentCollection();
 
-                Action constructing = Constructing(() => new ValueObjectFacade<string>(null, documentCollection, null));
+                Action constructing =
+                    Constructing(
+                        () => new ValueObjectFacade<string, string>(null, documentCollection, null, x => x, x => x));
 
                 constructing.Should().NotThrow();
             }
@@ -35,7 +37,9 @@ namespace Winton.DomainModelling.DocumentDb
                     PartitionKey = new PartitionKeyDefinition { Paths = { "/id" } }
                 };
 
-                Action constructing = Constructing(() => new ValueObjectFacade<string>(null, documentCollection, null));
+                Action constructing =
+                    Constructing(
+                        () => new ValueObjectFacade<string, string>(null, documentCollection, null, x => x, x => x));
 
                 constructing.Should().Throw<NotSupportedException>()
                             .WithMessage("Partitioned collections are not supported.");

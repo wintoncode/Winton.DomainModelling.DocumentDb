@@ -14,20 +14,20 @@ using Xunit;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    public class EntityOperationTests : IDisposable
+    public class EntityDtoPersistenceTests : IDisposable
     {
         private readonly Database _database;
         private readonly DocumentClient _documentClient;
         private readonly DocumentCollection _documentCollection;
         private readonly IEntityFacadeFactory _entityFacadeFactory;
 
-        public EntityOperationTests()
+        public EntityDtoPersistenceTests()
         {
             string documentDbUri = Environment.GetEnvironmentVariable("DOCUMENT_DB_URI");
             string documentDbKey = Environment.GetEnvironmentVariable("DOCUMENT_DB_KEY");
 
-            var database = new Database { Id = nameof(EntityOperationTests) };
-            var documentCollection = new DocumentCollection { Id = nameof(EntityOperationTests) };
+            var database = new Database { Id = nameof(EntityDtoPersistenceTests) };
+            var documentCollection = new DocumentCollection { Id = nameof(EntityDtoPersistenceTests) };
 
             _documentClient = new DocumentClient(new Uri(documentDbUri), documentDbKey);
             _database = _documentClient.CreateDatabaseIfNotExistsAsync(database).Result.Resource;
@@ -87,13 +87,17 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Create : EntityOperationTests
+        public sealed class Create : EntityDtoPersistenceTests
         {
             [Fact]
             private async Task ShouldReturnCreatedEntityIfIdSet()
             {
-                IEntityFacade<TestEntity, EntityId> entityFacade =
-                    _entityFacadeFactory.Create<TestEntity, EntityId>(_database, _documentCollection);
+                IEntityFacade<TestEntity, EntityId, TestDto> entityFacade =
+                    _entityFacadeFactory.Create<TestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new TestEntity((EntityId)d.Id, d.Value));
 
                 var entity = new TestEntity((EntityId)"A", 1);
                 TestEntity createdEntity = await entityFacade.Create(entity);
@@ -104,8 +108,12 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldReturnCreatedEntityIfIdUnset()
             {
-                IEntityFacade<TestEntity, EntityId> entityFacade =
-                    _entityFacadeFactory.Create<TestEntity, EntityId>(_database, _documentCollection);
+                IEntityFacade<TestEntity, EntityId, TestDto> entityFacade =
+                    _entityFacadeFactory.Create<TestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new TestEntity((EntityId)d.Id, d.Value));
 
                 var entity = new TestEntity(default(EntityId), 1);
                 TestEntity createdEntity = await entityFacade.Create(entity);
@@ -118,8 +126,12 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldSetIdOnCreatedEntityIfUnset()
             {
-                IEntityFacade<TestEntity, EntityId> entityFacade =
-                    _entityFacadeFactory.Create<TestEntity, EntityId>(_database, _documentCollection);
+                IEntityFacade<TestEntity, EntityId, TestDto> entityFacade =
+                    _entityFacadeFactory.Create<TestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new TestEntity((EntityId)d.Id, d.Value));
 
                 var entity = new TestEntity(default(EntityId), 1);
                 TestEntity createdEntity = await entityFacade.Create(entity);
@@ -128,13 +140,17 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Delete : EntityOperationTests
+        public sealed class Delete : EntityDtoPersistenceTests
         {
             [Fact]
             private async Task ShouldDeleteEntity()
             {
-                IEntityFacade<TestEntity, EntityId> entityFacade =
-                    _entityFacadeFactory.Create<TestEntity, EntityId>(_database, _documentCollection);
+                IEntityFacade<TestEntity, EntityId, TestDto> entityFacade =
+                    _entityFacadeFactory.Create<TestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new TestEntity((EntityId)d.Id, d.Value));
 
                 var createdEntity = new TestEntity((EntityId)"A", 1);
                 await entityFacade.Create(createdEntity);
@@ -147,15 +163,23 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Query : EntityOperationTests
+        public sealed class Query : EntityDtoPersistenceTests
         {
             [Fact]
             private async Task ShouldQueryEntitiesOfCorrectType()
             {
-                IEntityFacade<TestEntity, EntityId> entityFacade =
-                    _entityFacadeFactory.Create<TestEntity, EntityId>(_database, _documentCollection);
-                IEntityFacade<OtherTestEntity, EntityId> otherEntityFacade =
-                    _entityFacadeFactory.Create<OtherTestEntity, EntityId>(_database, _documentCollection);
+                IEntityFacade<TestEntity, EntityId, TestDto> entityFacade =
+                    _entityFacadeFactory.Create<TestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new TestEntity((EntityId)d.Id, d.Value));
+                IEntityFacade<OtherTestEntity, EntityId, TestDto> otherEntityFacade =
+                    _entityFacadeFactory.Create<OtherTestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new OtherTestEntity((EntityId)d.Id, d.Value));
 
                 var entities = new List<TestEntity>
                 {
@@ -185,15 +209,23 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Read : EntityOperationTests
+        public sealed class Read : EntityDtoPersistenceTests
         {
             [Fact]
             private async Task ShouldReturnEntityById()
             {
-                IEntityFacade<TestEntity, EntityId> entityFacade =
-                    _entityFacadeFactory.Create<TestEntity, EntityId>(_database, _documentCollection);
-                IEntityFacade<OtherTestEntity, EntityId> otherEntityFacade =
-                    _entityFacadeFactory.Create<OtherTestEntity, EntityId>(_database, _documentCollection);
+                IEntityFacade<TestEntity, EntityId, TestDto> entityFacade =
+                    _entityFacadeFactory.Create<TestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new TestEntity((EntityId)d.Id, d.Value));
+                IEntityFacade<OtherTestEntity, EntityId, TestDto> otherEntityFacade =
+                    _entityFacadeFactory.Create<OtherTestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new OtherTestEntity((EntityId)d.Id, d.Value));
 
                 var entity = new TestEntity((EntityId)"A", 1);
                 await entityFacade.Create(entity);
@@ -212,10 +244,18 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldReturnNullIfEntityWithIdNotFound()
             {
-                IEntityFacade<TestEntity, EntityId> entityFacade =
-                    _entityFacadeFactory.Create<TestEntity, EntityId>(_database, _documentCollection);
-                IEntityFacade<OtherTestEntity, EntityId> otherEntityFacade =
-                    _entityFacadeFactory.Create<OtherTestEntity, EntityId>(_database, _documentCollection);
+                IEntityFacade<TestEntity, EntityId, TestDto> entityFacade =
+                    _entityFacadeFactory.Create<TestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new TestEntity((EntityId)d.Id, d.Value));
+                IEntityFacade<OtherTestEntity, EntityId, TestDto> otherEntityFacade =
+                    _entityFacadeFactory.Create<OtherTestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new OtherTestEntity((EntityId)d.Id, d.Value));
 
                 var entityWithDifferentId = new TestEntity((EntityId)"B", 2);
                 await entityFacade.Create(entityWithDifferentId);
@@ -229,13 +269,17 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Upsert : EntityOperationTests
+        public sealed class Upsert : EntityDtoPersistenceTests
         {
             [Fact]
             private async Task ShouldCreateEntity()
             {
-                IEntityFacade<TestEntity, EntityId> entityFacade =
-                    _entityFacadeFactory.Create<TestEntity, EntityId>(_database, _documentCollection);
+                IEntityFacade<TestEntity, EntityId, TestDto> entityFacade =
+                    _entityFacadeFactory.Create<TestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new TestEntity((EntityId)d.Id, d.Value));
 
                 var entity = new TestEntity((EntityId)"A", 1);
                 await entityFacade.Upsert(entity);
@@ -248,8 +292,12 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldReturnCreatedEntity()
             {
-                IEntityFacade<TestEntity, EntityId> entityFacade =
-                    _entityFacadeFactory.Create<TestEntity, EntityId>(_database, _documentCollection);
+                IEntityFacade<TestEntity, EntityId, TestDto> entityFacade =
+                    _entityFacadeFactory.Create<TestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new TestEntity((EntityId)d.Id, d.Value));
 
                 var entity = new TestEntity((EntityId)"A", 1);
                 TestEntity createdEntity = await entityFacade.Upsert(entity);
@@ -260,8 +308,12 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldReturnUpdatedEntity()
             {
-                IEntityFacade<TestEntity, EntityId> entityFacade =
-                    _entityFacadeFactory.Create<TestEntity, EntityId>(_database, _documentCollection);
+                IEntityFacade<TestEntity, EntityId, TestDto> entityFacade =
+                    _entityFacadeFactory.Create<TestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new TestEntity((EntityId)d.Id, d.Value));
 
                 var createdEntity = new TestEntity((EntityId)"A", 1);
                 await entityFacade.Create(createdEntity);
@@ -275,8 +327,12 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldThrowIfIdUnset()
             {
-                IEntityFacade<TestEntity, EntityId> entityFacade =
-                    _entityFacadeFactory.Create<TestEntity, EntityId>(_database, _documentCollection);
+                IEntityFacade<TestEntity, EntityId, TestDto> entityFacade =
+                    _entityFacadeFactory.Create<TestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new TestEntity((EntityId)d.Id, d.Value));
 
                 var entity = new TestEntity(default(EntityId), 1);
 
@@ -289,8 +345,12 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldUpdateEntity()
             {
-                IEntityFacade<TestEntity, EntityId> entityFacade =
-                    _entityFacadeFactory.Create<TestEntity, EntityId>(_database, _documentCollection);
+                IEntityFacade<TestEntity, EntityId, TestDto> entityFacade =
+                    _entityFacadeFactory.Create<TestEntity, EntityId, TestDto>(
+                        _database,
+                        _documentCollection,
+                        e => new TestDto((string)e.Id, e.Value),
+                        d => new TestEntity((EntityId)d.Id, d.Value));
 
                 var createdEntity = new TestEntity((EntityId)"A", 1);
                 await entityFacade.Create(createdEntity);
@@ -312,8 +372,19 @@ namespace Winton.DomainModelling.DocumentDb
                 Value = value;
             }
 
-            // ReSharper disable once MemberCanBePrivate.Local
-            // ReSharper disable once UnusedAutoPropertyAccessor.Local
+            public int Value { get; }
+        }
+
+        private sealed class TestDto
+        {
+            public TestDto(string id, int value)
+            {
+                Id = id;
+                Value = value;
+            }
+
+            public string Id { get; }
+
             public int Value { get; }
         }
 

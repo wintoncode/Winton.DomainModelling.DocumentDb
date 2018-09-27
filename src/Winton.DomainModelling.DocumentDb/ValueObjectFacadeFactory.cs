@@ -41,5 +41,47 @@ namespace Winton.DomainModelling.DocumentDb
         {
             return new ValueObjectFacade<TValueObject>(database, documentCollection, _documentClient);
         }
+
+        /// <inheritdoc />
+        /// <summary>
+        ///     Create an <see cref="IValueObjectFacade{TValueObject,TDto}" /> for a Value Object of a specified type. The default
+        ///     implementation allows multiple types to be transparently stored in one collection using a 'wrapper' document type
+        ///     with a type discriminator.
+        /// </summary>
+        /// <typeparam name="TValueObject">The type of the Value Object.</typeparam>
+        /// <typeparam name="TDto">The DTO type for the Value Object.</typeparam>
+        /// <param name="database">The DocumentDb database.</param>
+        /// <param name="documentCollection">The DocumentDb collection. Partitioned collections are not supported.</param>
+        /// <param name="dtoMapping">A mapping function from the Value Object type to the DTO type.</param>
+        /// <param name="valueObjectMapping">A mapping function from the DTO type to the Value Object type.</param>
+        /// <returns>The created <see cref="IValueObjectFacade{TValueObject,TDto}" />.</returns>
+        public IValueObjectFacade<TValueObject, TDto> Create<TValueObject, TDto>(
+            Database database,
+            DocumentCollection documentCollection,
+            Func<TValueObject, TDto> dtoMapping,
+            Func<TDto, TValueObject> valueObjectMapping)
+            where TValueObject : IEquatable<TValueObject>
+        {
+            return new ValueObjectFacade<TValueObject, TDto>(
+                database,
+                documentCollection,
+                _documentClient,
+                dtoMapping,
+                valueObjectMapping);
+        }
+
+        private sealed class ValueObjectFacade<TValueObject> :
+            ValueObjectFacade<TValueObject, TValueObject>,
+            IValueObjectFacade<TValueObject>
+            where TValueObject : IEquatable<TValueObject>
+        {
+            public ValueObjectFacade(
+                Database database,
+                DocumentCollection documentCollection,
+                IDocumentClient documentClient)
+                : base(database, documentCollection, documentClient, x => x, x => x)
+            {
+            }
+        }
     }
 }
