@@ -6,21 +6,30 @@ using Newtonsoft.Json;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    internal sealed class EntityDocument<TEntity, TEntityId>
+    internal sealed class EntityDocument<TEntity, TEntityId, TDto>
         where TEntity : Entity<TEntityId>
         where TEntityId : IEquatable<TEntityId>
     {
-        public EntityDocument(TEntity entity)
+        [JsonConstructor]
+        private EntityDocument(TDto entity, string id, string type)
         {
-            Entity = entity;
+            Dto = entity;
+            Id = id;
+            Type = type;
         }
 
-        public TEntity Entity { get; }
+        [JsonProperty(PropertyName = "Entity")]
+        public TDto Dto { get; }
 
         [JsonProperty(PropertyName = "id")]
-        public string Id => GetDocumentId(Entity.Id);
+        public string Id { get; }
 
-        public string Type => GetDocumentType();
+        public string Type { get; }
+
+        public static EntityDocument<TEntity, TEntityId, TDto> Create(TEntity entity, TDto dto)
+        {
+            return new EntityDocument<TEntity, TEntityId, TDto>(dto, GetDocumentId(entity.Id), GetDocumentType());
+        }
 
         public static string GetDocumentId(TEntityId id)
         {

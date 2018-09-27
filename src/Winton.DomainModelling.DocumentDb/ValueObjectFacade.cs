@@ -11,17 +11,21 @@ using Microsoft.Azure.Documents.Client;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    internal sealed class ValueObjectFacade<TValueObject> : IValueObjectFacade<TValueObject>
+    internal class ValueObjectFacade<TValueObject, TDto> : IValueObjectFacade<TValueObject, TDto>
         where TValueObject : IEquatable<TValueObject>
     {
         private readonly Database _database;
         private readonly IDocumentClient _documentClient;
         private readonly DocumentCollection _documentCollection;
+        private readonly Func<TValueObject, TDto> _dtoMapping;
+        private readonly Func<TDto, TValueObject> _valueObjectMapping;
 
         public ValueObjectFacade(
             Database database,
             DocumentCollection documentCollection,
-            IDocumentClient documentClient)
+            IDocumentClient documentClient,
+            Func<TValueObject, TDto> dtoMapping,
+            Func<TDto, TValueObject> valueObjectMapping)
         {
             if (documentCollection.PartitionKey.Paths.Any())
             {
@@ -31,15 +35,17 @@ namespace Winton.DomainModelling.DocumentDb
             _database = database;
             _documentCollection = documentCollection;
             _documentClient = documentClient;
+            _dtoMapping = dtoMapping;
+            _valueObjectMapping = valueObjectMapping;
         }
 
         public async Task Create(TValueObject valueObject)
         {
-            ValueObjectDocument<TValueObject> document = Get(valueObject);
+            ValueObjectDocument<TValueObject, TDto> document = Get(valueObject);
 
             if (document == null)
             {
-                document = ValueObjectDocument<TValueObject>.Create(valueObject);
+                document = ValueObjectDocument<TValueObject, TDto>.Create(valueObject, _dtoMapping(valueObject));
 
                 await _documentClient.CreateDocumentAsync(GetUri(), document);
             }
@@ -47,7 +53,7 @@ namespace Winton.DomainModelling.DocumentDb
 
         public async Task Delete(TValueObject valueObject)
         {
-            ValueObjectDocument<TValueObject> document = Get(valueObject);
+            ValueObjectDocument<TValueObject, TDto> document = Get(valueObject);
 
             if (document != null)
             {
@@ -55,27 +61,28 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public IEnumerable<TValueObject> Query(Expression<Func<TValueObject, bool>> predicate = null)
+        public IEnumerable<TValueObject> Query(Expression<Func<TDto, bool>> predicate = null)
         {
             return CreateValueObjectDocumentQuery()
-                .Select(x => x.ValueObject)
+                .Select(x => x.Dto)
                 .Where(predicate ?? (x => true))
-                .AsEnumerable();
+                .AsEnumerable()
+                .Select(x => _valueObjectMapping(x));
         }
 
-        private IQueryable<ValueObjectDocument<TValueObject>> CreateValueObjectDocumentQuery()
+        private IQueryable<ValueObjectDocument<TValueObject, TDto>> CreateValueObjectDocumentQuery()
         {
-            string valueObjectType = ValueObjectDocument<TValueObject>.GetDocumentType();
+            string valueObjectType = ValueObjectDocument<TValueObject, TDto>.GetDocumentType();
 
-            return _documentClient.CreateDocumentQuery<ValueObjectDocument<TValueObject>>(GetUri())
+            return _documentClient.CreateDocumentQuery<ValueObjectDocument<TValueObject, TDto>>(GetUri())
                                   .Where(x => x.Type == valueObjectType);
         }
 
-        private ValueObjectDocument<TValueObject> Get(TValueObject valueObject)
+        private ValueObjectDocument<TValueObject, TDto> Get(TValueObject valueObject)
         {
             return CreateValueObjectDocumentQuery()
                 .AsEnumerable()
-                .SingleOrDefault(x => x.ValueObject.Equals(valueObject));
+                .SingleOrDefault(x => _valueObjectMapping(x.Dto).Equals(valueObject));
         }
 
         private Uri GetUri()

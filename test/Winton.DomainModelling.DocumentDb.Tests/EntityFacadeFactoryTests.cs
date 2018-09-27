@@ -19,13 +19,26 @@ namespace Winton.DomainModelling.DocumentDb
         public sealed class Create : EntityFacadeFactoryTests
         {
             [Fact]
-            private void ShouldReturnEntityFacade()
+            private void ShouldReturnEntityFacadeWithMapping()
+            {
+                IEntityFacade<TestEntity, string, string> entityFacade =
+                    _entityFacadeFactory.Create<TestEntity, string, string>(
+                        null,
+                        new DocumentCollection(),
+                        e => e.Id,
+                        d => new TestEntity(d));
+
+                entityFacade.Should().BeAssignableTo<EntityFacade<TestEntity, string, string>>();
+            }
+
+            [Fact]
+            private void ShouldReturnEntityFacadeWithoutMapping()
             {
                 IEntityFacade<TestEntity, string> entityFacade = _entityFacadeFactory.Create<TestEntity, string>(
                     null,
                     new DocumentCollection());
 
-                entityFacade.Should().BeOfType<EntityFacade<TestEntity, string>>();
+                entityFacade.Should().BeAssignableTo<EntityFacade<TestEntity, string, TestEntity>>();
             }
         }
 

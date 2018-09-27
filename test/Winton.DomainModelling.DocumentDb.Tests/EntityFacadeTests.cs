@@ -12,7 +12,7 @@ namespace Winton.DomainModelling.DocumentDb
     {
         public sealed class Constructor : EntityFacadeTests
         {
-            private static Action Constructing(Func<EntityFacade<TestEntity, string>> ctor)
+            private static Action Constructing(Func<EntityFacade<TestEntity, string, TestEntity>> ctor)
             {
                 return () => ctor();
             }
@@ -23,7 +23,14 @@ namespace Winton.DomainModelling.DocumentDb
                 var documentCollection = new DocumentCollection();
 
                 Action constructing =
-                    Constructing(() => new EntityFacade<TestEntity, string>(null, documentCollection, null));
+                    Constructing(
+                        () =>
+                            new EntityFacade<TestEntity, string, TestEntity>(
+                                null,
+                                documentCollection,
+                                null,
+                                x => x,
+                                x => x));
 
                 constructing.Should().NotThrow();
             }
@@ -37,7 +44,14 @@ namespace Winton.DomainModelling.DocumentDb
                 };
 
                 Action constructing =
-                    Constructing(() => new EntityFacade<TestEntity, string>(null, documentCollection, null));
+                    Constructing(
+                        () =>
+                            new EntityFacade<TestEntity, string, TestEntity>(
+                                null,
+                                documentCollection,
+                                null,
+                                x => x,
+                                x => x));
 
                 constructing.Should().Throw<NotSupportedException>()
                             .WithMessage("Partitioned collections are not supported.");

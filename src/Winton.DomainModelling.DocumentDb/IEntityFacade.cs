@@ -8,12 +8,26 @@ using System.Threading.Tasks;
 
 namespace Winton.DomainModelling.DocumentDb
 {
+    /// <inheritdoc />
     /// <summary>
     ///     An abstraction layer over <see cref="Entity{TEntityId}" /> CRUD operations in DocumentDb.
     /// </summary>
-    /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <typeparam name="TEntityId">The ID type of the entity.</typeparam>
-    public interface IEntityFacade<TEntity, in TEntityId>
+    /// <typeparam name="TEntity">The type of the Entity.</typeparam>
+    /// <typeparam name="TEntityId">The ID type of the Entity.</typeparam>
+    public interface IEntityFacade<TEntity, in TEntityId> : IEntityFacade<TEntity, TEntityId, TEntity>
+        where TEntity : Entity<TEntityId>
+        where TEntityId : IEquatable<TEntityId>
+    {
+    }
+
+    /// <summary>
+    ///     An abstraction layer over <see cref="Entity{TEntityId}" /> CRUD operations in DocumentDb. Allows
+    ///     <see cref="Entity{TEntityId}" /> types to be mapped to DTO types for persistence.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the Entity.</typeparam>
+    /// <typeparam name="TEntityId">The ID type of the Entity.</typeparam>
+    /// <typeparam name="TDto">The DTO type for the Entity.</typeparam>
+    public interface IEntityFacade<TEntity, in TEntityId, TDto>
         where TEntity : Entity<TEntityId>
         where TEntityId : IEquatable<TEntityId>
     {
@@ -39,7 +53,7 @@ namespace Winton.DomainModelling.DocumentDb
         /// </summary>
         /// <param name="predicate">An optional predicate to filter the results.</param>
         /// <returns>An <see cref="IEnumerable{TEntity}" />.</returns>
-        IEnumerable<TEntity> Query(Expression<Func<TEntity, bool>> predicate = null);
+        IEnumerable<TEntity> Query(Expression<Func<TDto, bool>> predicate = null);
 
         /// <summary>
         ///     Read an <see cref="Entity{TEntityId}" /> of a specified type by ID.

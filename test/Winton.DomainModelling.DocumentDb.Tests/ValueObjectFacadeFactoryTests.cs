@@ -19,13 +19,25 @@ namespace Winton.DomainModelling.DocumentDb
         public sealed class Create : ValueObjectFacadeFactoryTests
         {
             [Fact]
-            private void ShouldReturnValueObjectFacade()
+            private void ShouldReturnValueObjectFacadeWithMapping()
+            {
+                IValueObjectFacade<string, int> valueObjectFacade = _valueObjectFacadeFactory.Create<string, int>(
+                    null,
+                    new DocumentCollection(),
+                    int.Parse,
+                    d => d.ToString());
+
+                valueObjectFacade.Should().BeAssignableTo<ValueObjectFacade<string, int>>();
+            }
+
+            [Fact]
+            private void ShouldReturnValueObjectFacadeWithoutMapping()
             {
                 IValueObjectFacade<string> valueObjectFacade = _valueObjectFacadeFactory.Create<string>(
                     null,
                     new DocumentCollection());
 
-                valueObjectFacade.Should().BeOfType<ValueObjectFacade<string>>();
+                valueObjectFacade.Should().BeAssignableTo<ValueObjectFacade<string, string>>();
             }
         }
     }

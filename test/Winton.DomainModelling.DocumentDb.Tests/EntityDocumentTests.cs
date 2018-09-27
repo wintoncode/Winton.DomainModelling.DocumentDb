@@ -52,17 +52,38 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public sealed class Entity : EntityDocumentTests
+        private struct TestDto
+        {
+            public TestDto(int id)
+            {
+                Id = id;
+            }
+
+            // ReSharper disable once MemberCanBePrivate.Local
+            // ReSharper disable once UnusedAutoPropertyAccessor.Local
+            public int Id { get; }
+        }
+
+        public sealed class Dto : EntityDocumentTests
         {
             [Fact]
-            private void ShouldReturnEntity()
+            private void ShouldReturnDto()
             {
-                var expected = new TestEntity((EntityId)1);
-                var document = new EntityDocument<TestEntity, EntityId>(expected);
+                var expected = new TestDto(1);
+                EntityDocument<TestEntity, EntityId, TestDto> document =
+                    EntityDocument<TestEntity, EntityId, TestDto>.Create(new TestEntity((EntityId)1), expected);
 
-                TestEntity entity = document.Entity;
+                TestDto dto = document.Dto;
 
-                entity.Should().Be(expected);
+                dto.Should().Be(expected);
+            }
+
+            [Fact]
+            private void ShouldSerializePropertyNameAsEntity()
+            {
+                typeof(EntityDocument<TestEntity, EntityId, TestDto>)
+                    .GetProperty(nameof(EntityDocument<TestEntity, EntityId, TestDto>.Dto))
+                    .Should().BeDecoratedWith<JsonPropertyAttribute>(a => a.PropertyName == "Entity");
             }
         }
 
@@ -71,7 +92,7 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldReturnEntityTypeAndEntityId()
             {
-                string id = EntityDocument<TestEntity, EntityId>.GetDocumentId((EntityId)1);
+                string id = EntityDocument<TestEntity, EntityId, TestDto>.GetDocumentId((EntityId)1);
 
                 id.Should().Be("TestEntity_1");
             }
@@ -82,19 +103,19 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldReturnEntityType()
             {
-                string type = EntityDocument<TestEntity, EntityId>.GetDocumentType();
+                string type = EntityDocument<TestEntity, EntityId, TestDto>.GetDocumentType();
 
                 type.Should().Be("TestEntity");
             }
         }
 
-        public sealed class Id : EntityDocumentTests
+        public sealed class IdProperty : EntityDocumentTests
         {
             [Fact]
             private void ShouldReturnEntityTypeAndEntityId()
             {
-                var entity = new TestEntity((EntityId)1);
-                var document = new EntityDocument<TestEntity, EntityId>(entity);
+                EntityDocument<TestEntity, EntityId, TestDto> document =
+                    EntityDocument<TestEntity, EntityId, TestDto>.Create(new TestEntity((EntityId)1), new TestDto(1));
 
                 string id = document.Id;
 
@@ -104,8 +125,8 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldSerializePropertyNameAsLowercase()
             {
-                typeof(EntityDocument<TestEntity, EntityId>)
-                    .GetProperty(nameof(EntityDocument<TestEntity, EntityId>.Id))
+                typeof(EntityDocument<TestEntity, EntityId, TestDto>)
+                    .GetProperty(nameof(EntityDocument<TestEntity, EntityId, TestDto>.Id))
                     .Should().BeDecoratedWith<JsonPropertyAttribute>(a => a.PropertyName == "id");
             }
         }
@@ -115,8 +136,8 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldReturnEntityType()
             {
-                var entity = new TestEntity((EntityId)1);
-                var document = new EntityDocument<TestEntity, EntityId>(entity);
+                EntityDocument<TestEntity, EntityId, TestDto> document =
+                    EntityDocument<TestEntity, EntityId, TestDto>.Create(new TestEntity((EntityId)1), new TestDto(1));
 
                 string type = document.Type;
 

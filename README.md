@@ -9,7 +9,7 @@ A facade library useful for [Entity](https://github.com/wintoncode/Winton.Domain
 
 This implementations allow multiple types to be transparently stored in one collection using 'wrapper' documents with type discriminators and namespaced IDs (for entities). It can be tempting for those from a traditional SQL background to provision a separate collection per type. However, this is often unnecessarily expensive, especially if much of the reserved throughput for a given collection is unused. Taking advantage of the "schemaless" nature of a document store, such as DocumentDb, can both reduce cost and simplify infrastructural complexity. This implementation provides an easy way to work with a single collection within a bounded context (within which persisted type names are unique) while outwardly still achieving the desired level of strong typing. There really is a schema, but the database doesn't need to know about it.
 
-## Facade Types
+## Facade Interfaces
 
 Note that the default implementations are currently **incompatible with partitioned collections**. This restriction could potentially be lifted in a future version, at the expense of implementation complexity (and probably a leakier abstraction). However, for applications requiring large collections, where partitioning is actually needed, the conveniences provided by this facade are unlikely to be suitable anyway.
 
@@ -21,7 +21,7 @@ An abstraction layer over [Entity](https://github.com/wintoncode/Winton.DomainMo
 
 An abstraction layer over Value Object operations in DocumentDb. Provides strong typed Create, Delete, and Query methods.
 
-## Usage
+## Domain Object Persistence
 
 The default implementations of both `IEntityFacade` and `IValueObjectFacade` should be created from their provided factories. These can each be constructed from an [IDocumentClient](https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.documents.idocumentclient). Their Create methods both take a [Database](https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.documents.database) and a [DocumentCollection](https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.documents.documentcollection). Of course, resolving all dependencies from a DI container is preferred, but for clarity they can be manually constructed as
 
@@ -34,8 +34,9 @@ DocumentCollection documentCollection = new DocumentCollection { Id = "Accountin
 IEntityFacadeFactory entityFacadeFactory = new EntityFacadeFactory(documentClient);
 IValueObjectFacadeFactory valueObjectFacadeFactory = new ValueObjectFacadeFactory(documentClient);
 
-IEntityFacade<Account, AccountId> entityFacade = entityFacadeFactory.Create<Account, AccountId>(database, documentCollection);
-IValueObjectFacade<AccountType> valueObjectFacade = valueObjectFacadeFactory.Create<AccountType>(database, documentCollection);
+IEntityFacade<Account, AccountId> accountFacade = entityFacadeFactory.Create<Account, AccountId>(database, documentCollection);
+IEntityFacade<Transaction, TransactionId> transactionFacade = entityFacadeFactory.Create<Transaction, TransactionId>(database, documentCollection);
+IValueObjectFacade<AccountType> accountTypeFacade = valueObjectFacadeFactory.Create<AccountType>(database, documentCollection);
 ```
 
 Consider some application with an "Accounting" domain containing 2 entity types, `Account` and `Transaction`, each with a [strong typed](https://tech.winton.com/2017/06/strong-typing-a-pattern-for-more-robust-code/) ID. Note that both ID types use [SingleValueConverter](https://github.com/wintoncode/Winton.Extensions.Serialization.Json#singlevalueconverter), so they are string-serializable. The "Accounting" domain also contains a value object type, `AccountType`, used as reference data.
@@ -98,7 +99,6 @@ public struct AccountType : IEquatable<AccountType>
         string name,
         decimal rate,
         ...)
-        : base(id)
     {
         Name = name;
         Rate = rate;
@@ -144,7 +144,7 @@ public interface IAccountTypeRepository
 }
 ```
 
-The respective implementations of these repositories, potentially defined in a separate "Persistence" layer, would simply be thin wrappers around the `IEntityFacade` or `IValueObjectFacade`.
+The respective implementations of these repositories, potentially defined in a separate persistence layer, would simply be thin wrappers around the `IEntityFacade` or `IValueObjectFacade`.
 
 ```csharp
 internal sealed class AccountRepository : IAccountRepository
@@ -215,3 +215,259 @@ internal sealed class AccountTypeRepository : IAccountTypeRepository
 ```
 
 These repositories will store their respective types in a single shared collection, using the type names to discriminate between each type and namespace the IDs (for entities). Therefore, these names should be considered part of the document schema, and would require a data migration if they were changed as part of a domain refactoring.
+
+## Data Transfer Object Persistence
+
+In most applications, it is desirable to completely separate persistence concerns from domain logic. The above examples slightly violate this principle by leaking some Json serialization details into the domain objects. However, this can be easily avoided, at the expense of having to define some Data Transfer Objects (DTOs), and mapping functions. Consider essentially the same domain objects, but with all serialization logic removed.
+
+```csharp
+public struct AccountId : IEquatable<AccountId>
+{
+    public static explicit operator string(AccountId id) { ... }
+
+    public static explicit operator AccountId(string value) { ... }
+
+    ...
+}
+
+...
+
+public struct TransactionId : IEquatable<TransactionId>
+{
+    public static explicit operator string(TransactionId id) { ... }
+
+    public static explicit operator TransactionId(string value) { ... }
+
+    ...
+}
+
+...
+
+public struct AccountType : IEquatable<AccountType>
+{
+    public AccountType(
+        string name,
+        decimal rate,
+        ...)
+    {
+        Name = name;
+        Rate = rate;
+        ...
+    }
+
+    public string Name { get; }
+
+    public decimal Rate { get; }
+
+    ...
+}
+```
+
+The persistence layer DTOs, including serialization logic, for these simple types would then look very similar to the original domain objects.
+
+```csharp
+internal struct AccountDto
+{
+    [JsonConstructor]
+    public AccountDto(
+        string id,
+        AccountTypeDto type,
+        ...)
+    {
+        Type = type;
+        ...
+    }
+
+    public string Id { get; }
+
+    public AccountTypeDto Type { get; }
+
+    ...
+
+    public static AccountDto FromDomainObject(Account account)
+    {
+        return new AccountDto(
+            (string)account.Id,
+            new AccountTypeDto(account.Type.Name, account.Type.Rate),
+            ...);
+    }
+
+    public Account ToDomainObject()
+    {
+        return new Account(
+            (AccountId)Id,
+            new AccountType(Type.Name, Type.Rate),
+            ...);
+    }
+}
+
+internal struct TransactionDto
+{
+    [JsonConstructor]
+    public TransactionDto(
+        string id,
+        string sender,
+        string recipient,
+        ...)
+    {
+        Sender = sender;
+        Recipient = recipient;
+        ...
+    }
+
+    public string Id { get; }
+
+    public string Sender { get; }
+
+    public string Recipient { get; }
+
+    ...
+
+    public static TransactionDto FromDomainObject(Transaction transaction)
+    {
+        return new TransactionDto(
+            (string)transaction.Id,
+            (string)transaction.Sender,
+            (string)transaction.Recipient,
+            ...);
+    }
+
+    public Transaction ToDomainObject()
+    {
+        return new Transaction(
+            (TransactionId)Id,
+            (AccountId)Sender,
+            (AccountId)Recipient,
+            ...);
+    }
+}
+
+internal struct AccountTypeDto
+{
+    [JsonConstructor]
+    public AccountTypeDto(
+        string name,
+        decimal rate,
+        ...)
+    {
+        Name = name;
+        Rate = rate;
+        ...
+    }
+
+    public string Name { get; }
+
+    public decimal Rate { get; }
+
+    ...
+
+    public static AccountTypeDto FromDomainObject(AccountType accountType)
+    {
+        return new AccountTypeDto(
+            accountType.Name,
+            accountType.Rate,
+            ...);
+    }
+
+    public AccountType ToDomainObject()
+    {
+        return new AccountType(
+            Name,
+            Rate,
+            ...);
+    }
+}
+```
+
+The overloaded implementations of both `IEntityFacade` and `IValueObjectFacade` can be created from the same factories, but by specifying the appropriate DTO and mapping function. They can be manually constructed as
+
+```csharp
+IEntityFacade<Account, AccountId, AccountDto> accountFacade = entityFacadeFactory.Create<Account, AccountId, AccountDto>(
+    database,
+    documentCollection,
+    account => AccountDto.FromDomainObject(account),
+    dto => dto.ToDomainObject());
+IEntityFacade<Transaction, TransactionId, TransactionDto> transactionFacade = entityFacadeFactory.Create<Transaction, TransactionId, TransactionDto>(
+    database,
+    documentCollection,
+    transaction => TransactionDto.FromDomainObject(transaction),
+    dto => dto.ToDomainObject());
+IValueObjectFacade<AccountType, AccountTypeDto> accountTypeFacade = valueObjectFacadeFactory.Create<AccountType, AccountTypeDto>(
+    database,
+    documentCollection,
+    accountType => AccountTypeDto.FromDomainObject(accountType),
+    dto => dto.ToDomainObject());
+```
+
+The new repository implementations would then use the overloaded facade interfaces.
+
+```csharp
+internal sealed class AccountRepository : IAccountRepository
+{
+    private readonly IEntityFacade<Account, AccountId, AccountDto> _entityFacade;
+
+    public AccountRepository(IEntityFacade<Account, AccountId, AccountDto> entityFacade)
+    {
+        _entityFacade = entityFacade;
+    }
+
+    public async Task<AccountId> Create(Account account)
+    {
+        return (await _entityFacade.Create(account)).Id;
+    }
+
+    public async Task<Account> Get(AccountId id)
+    {
+        return await _entityFacade.Read(id);
+    }
+
+    ...
+}
+
+internal sealed class TransactionRepository : ITransactionRepository
+{
+    private readonly IEntityFacade<Transaction, TransactionId, TransactionDto> _entityFacade;
+
+    public TransactionRepository(IEntityFacade<Transaction, TransactionId, TransactionDto> entityFacade)
+    {
+        _entityFacade = entityFacade;
+    }
+
+    public async Task<TransactionId> Create(Transaction transaction)
+    {
+        return (await _entityFacade.Create(transaction)).Id;
+    }
+
+    public IEnumerable<Transaction> GetAllSentBy(AccountId accountId)
+    {
+        var sender = (string)accountId;
+        return _entityFacade.Query(t => t.Sender == sender);
+    }
+
+    ...
+}
+
+internal sealed class AccountTypeRepository : IAccountTypeRepository
+{
+    private readonly IValueObjectFacade<AccountType, AccountTypeDto> _valueObjectFacade;
+
+    public AccountTypeRepository(IValueObjectFacade<AccountType, AccountTypeDto> valueObjectFacade)
+    {
+        _valueObjectFacade = valueObjectFacade;
+    }
+
+    public async Task Create(AccountType accountType)
+    {
+        await _valueObjectFacade.Create(accountType);
+    }
+
+    public IEnumerable<AccountType> GetAll()
+    {
+        return _valueObjectFacade.Query();
+    }
+
+    ...
+}
+```
+
+Of course, this method results in more code overall, due to the need to define the DTOs, and lambdas to perform the mappings. However, these types and conversions are very simple, and full separation of domain and persistence concerns has been achieved. As before, these repositories will store their respective types in a single shared collection, using the **domain object** type names to discriminate between each type.

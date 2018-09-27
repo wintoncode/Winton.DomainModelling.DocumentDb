@@ -12,7 +12,18 @@ namespace Winton.DomainModelling.DocumentDb
     ///     An abstraction layer over Value Object operations in DocumentDb.
     /// </summary>
     /// <typeparam name="TValueObject">The type of the Value Object.</typeparam>
-    public interface IValueObjectFacade<TValueObject>
+    public interface IValueObjectFacade<TValueObject> : IValueObjectFacade<TValueObject, TValueObject>
+        where TValueObject : IEquatable<TValueObject>
+    {
+    }
+
+    /// <summary>
+    ///     An abstraction layer over Value Object operations in DocumentDb. Allows Value Object types to be mapped to DTO
+    ///     types for persistence.
+    /// </summary>
+    /// <typeparam name="TValueObject">The type of the Value Object.</typeparam>
+    /// <typeparam name="TDto">The DTO type for the Value Object.</typeparam>
+    public interface IValueObjectFacade<TValueObject, TDto>
         where TValueObject : IEquatable<TValueObject>
     {
         /// <summary>
@@ -35,6 +46,6 @@ namespace Winton.DomainModelling.DocumentDb
         /// </summary>
         /// <param name="predicate">An optional predicate to filter the results.</param>
         /// <returns>An <see cref="IEnumerable{TValueObject}" />.</returns>
-        IEnumerable<TValueObject> Query(Expression<Func<TValueObject, bool>> predicate = null);
+        IEnumerable<TValueObject> Query(Expression<Func<TDto, bool>> predicate = null);
     }
 }
