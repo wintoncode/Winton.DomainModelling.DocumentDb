@@ -283,6 +283,22 @@ internal struct AccountDto
     public AccountTypeDto Type { get; }
 
     ...
+
+    public static AccountDto FromDomainObject(Account account)
+    {
+        return new AccountDto(
+            (string)account.Id,
+            new AccountTypeDto(account.Type.Name, account.Type.Rate),
+            ...);
+    }
+
+    public Account ToDomainObject()
+    {
+        return new Account(
+            (AccountId)Id,
+            new AccountType(Type.Name, Type.Rate),
+            ...);
+    }
 }
 
 internal struct TransactionDto
@@ -306,6 +322,24 @@ internal struct TransactionDto
     public string Recipient { get; }
 
     ...
+
+    public static TransactionDto FromDomainObject(Transaction transaction)
+    {
+        return new TransactionDto(
+            (string)transaction.Id,
+            (string)transaction.Sender,
+            (string)transaction.Recipient,
+            ...);
+    }
+
+    public Transaction ToDomainObject()
+    {
+        return new Transaction(
+            (TransactionId)Id,
+            (AccountId)Sender,
+            (AccountId)Recipient,
+            ...);
+    }
 }
 
 internal struct AccountTypeDto
@@ -326,6 +360,22 @@ internal struct AccountTypeDto
     public decimal Rate { get; }
 
     ...
+
+    public static AccountTypeDto FromDomainObject(AccountType accountType)
+    {
+        return new AccountTypeDto(
+            accountType.Name,
+            accountType.Rate,
+            ...);
+    }
+
+    public AccountType ToDomainObject()
+    {
+        return new AccountType(
+            Name,
+            Rate,
+            ...);
+    }
 }
 ```
 
@@ -335,18 +385,18 @@ The overloaded implementations of both `IEntityFacade` and `IValueObjectFacade` 
 IEntityFacade<Account, AccountId, AccountDto> accountFacade = entityFacadeFactory.Create<Account, AccountId, AccountDto>(
     database,
     documentCollection,
-    a => new AccountDto((string)a.Id, new AccountTypeDto(a.Type.Name, a.Type.Rate)),
-    d => new Account((AccountId)d.Id, new AccountType(d.Type.Name, d.Type.Rate)));
+    account => AccountDto.FromDomainObject(account),
+    dto => dto.ToDomainObject());
 IEntityFacade<Transaction, TransactionId, TransactionDto> transactionFacade = entityFacadeFactory.Create<Transaction, TransactionId, TransactionDto>(
     database,
     documentCollection,
-    t => new TransactionDto((string)t.Id, (string)t.Sender, (string)t.Recipient),
-    d => new Transaction((TransactionId)d.Id, (AccountId)d.Sender, (AccountId)d.Recipient));
+    transaction => TransactionDto.FromDomainObject(transaction),
+    dto => dto.ToDomainObject());
 IValueObjectFacade<AccountType, AccountTypeDto> accountTypeFacade = valueObjectFacadeFactory.Create<AccountType, AccountTypeDto>(
     database,
     documentCollection,
-    at => new AccountTypeDto(at.Name, at.Rate),
-    d => new AccountType(d.Name, d.Rate));
+    accountType => AccountTypeDto.FromDomainObject(accountType),
+    dto => dto.ToDomainObject());
 ```
 
 The new repository implementations would then use the overloaded facade interfaces.
