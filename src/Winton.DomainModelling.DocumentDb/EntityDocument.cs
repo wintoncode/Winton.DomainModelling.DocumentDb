@@ -10,11 +10,6 @@ namespace Winton.DomainModelling.DocumentDb
         where TEntity : Entity<TEntityId>
         where TEntityId : IEquatable<TEntityId>
     {
-        public EntityDocument(TEntity entity, TDto dto)
-            : this(dto, GetDocumentId(entity.Id), GetDocumentType())
-        {
-        }
-
         [JsonConstructor]
         private EntityDocument(TDto entity, string id, string type)
         {
@@ -30,6 +25,11 @@ namespace Winton.DomainModelling.DocumentDb
         public string Id { get; }
 
         public string Type { get; }
+
+        public static EntityDocument<TEntity, TEntityId, TDto> Create(TEntity entity, TDto dto)
+        {
+            return new EntityDocument<TEntity, TEntityId, TDto>(dto, GetDocumentId(entity.Id), GetDocumentType());
+        }
 
         public static string GetDocumentId(TEntityId id)
         {

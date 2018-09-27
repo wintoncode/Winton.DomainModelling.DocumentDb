@@ -45,7 +45,8 @@ namespace Winton.DomainModelling.DocumentDb
         {
             TEntity entityWithId = entity.WithId<TEntity, TEntityId>();
 
-            var document = new EntityDocument<TEntity, TEntityId, TDto>(entityWithId, _dtoMapping(entityWithId));
+            EntityDocument<TEntity, TEntityId, TDto> document =
+                EntityDocument<TEntity, TEntityId, TDto>.Create(entityWithId, _dtoMapping(entityWithId));
 
             ResourceResponse<Document> response = await _documentClient.CreateDocumentAsync(GetUri(), document);
             EntityDocument<TEntity, TEntityId, TDto> responseDocument = (dynamic)response.Resource;
@@ -92,7 +93,9 @@ namespace Winton.DomainModelling.DocumentDb
                 throw new NotSupportedException("Upserting with default ID is not supported.");
             }
 
-            var document = new EntityDocument<TEntity, TEntityId, TDto>(entity, _dtoMapping(entity));
+            EntityDocument<TEntity, TEntityId, TDto> document = EntityDocument<TEntity, TEntityId, TDto>.Create(
+                entity,
+                _dtoMapping(entity));
 
             ResourceResponse<Document> response = await _documentClient.UpsertDocumentAsync(GetUri(), document);
             EntityDocument<TEntity, TEntityId, TDto> responseDocument = (dynamic)response.Resource;

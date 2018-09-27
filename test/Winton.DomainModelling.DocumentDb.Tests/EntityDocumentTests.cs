@@ -70,7 +70,8 @@ namespace Winton.DomainModelling.DocumentDb
             private void ShouldReturnDto()
             {
                 var expected = new TestDto(1);
-                var document = new EntityDocument<TestEntity, EntityId, TestDto>(new TestEntity((EntityId)1), expected);
+                EntityDocument<TestEntity, EntityId, TestDto> document =
+                    EntityDocument<TestEntity, EntityId, TestDto>.Create(new TestEntity((EntityId)1), expected);
 
                 TestDto dto = document.Dto;
 
@@ -113,9 +114,8 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldReturnEntityTypeAndEntityId()
             {
-                var document = new EntityDocument<TestEntity, EntityId, TestDto>(
-                    new TestEntity((EntityId)1),
-                    new TestDto(1));
+                EntityDocument<TestEntity, EntityId, TestDto> document =
+                    EntityDocument<TestEntity, EntityId, TestDto>.Create(new TestEntity((EntityId)1), new TestDto(1));
 
                 string id = document.Id;
 
@@ -136,9 +136,8 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldReturnEntityType()
             {
-                var document = new EntityDocument<TestEntity, EntityId, TestDto>(
-                    new TestEntity((EntityId)1),
-                    new TestDto(1));
+                EntityDocument<TestEntity, EntityId, TestDto> document =
+                    EntityDocument<TestEntity, EntityId, TestDto>.Create(new TestEntity((EntityId)1), new TestDto(1));
 
                 string type = document.Type;
 

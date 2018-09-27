@@ -9,11 +9,6 @@ namespace Winton.DomainModelling.DocumentDb
     internal sealed class ValueObjectDocument<TValueObject, TDto>
         where TValueObject : IEquatable<TValueObject>
     {
-        public ValueObjectDocument(TValueObject valueObject, TDto dto)
-            : this(dto, null, GetDocumentType())
-        {
-        }
-
         [JsonConstructor]
         private ValueObjectDocument(TDto valueObject, string id, string type)
         {
@@ -29,6 +24,11 @@ namespace Winton.DomainModelling.DocumentDb
         public string Id { get; }
 
         public string Type { get; }
+
+        public static ValueObjectDocument<TValueObject, TDto> Create(TValueObject valueObject, TDto dto)
+        {
+            return new ValueObjectDocument<TValueObject, TDto>(dto, null, GetDocumentType());
+        }
 
         public static string GetDocumentType()
         {

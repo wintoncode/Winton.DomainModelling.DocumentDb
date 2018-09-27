@@ -45,7 +45,7 @@ namespace Winton.DomainModelling.DocumentDb
 
             if (document == null)
             {
-                document = new ValueObjectDocument<TValueObject, TDto>(valueObject, _dtoMapping(valueObject));
+                document = ValueObjectDocument<TValueObject, TDto>.Create(valueObject, _dtoMapping(valueObject));
 
                 await _documentClient.CreateDocumentAsync(GetUri(), document);
             }
