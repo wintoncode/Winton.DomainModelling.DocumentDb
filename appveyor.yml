@@ -3,22 +3,27 @@ environment:
   CLI_VERSION: latest
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-#  DOCUMENT_DB_URI: https://localhost:8081
-#  DOCUMENT_DB_KEY: C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==
+  DOCUMENT_DB_URI: https://localhost:8081
+  DOCUMENT_DB_KEY: C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==
 image: Visual Studio 2017
 configuration:
     - Release
 skip_tags: true
-#install:
-#    - ps: Start-Process "C:\Program Files\Azure Cosmos DB Emulator\CosmosDB.Emulator.exe" -ArgumentList "/NoExplorer","/NoUI","/NoFirewall"
-#    - ps: Start-Sleep -s 15
+install:
+    - cmd: wmic product where name="Azure Cosmos DB Emulator" call uninstall
+    - ps: Remove-Item -Path "C:\Program Files\Azure Cosmos DB Emulator" -Recurse
+    - ps: Start-FileDownload "https://aka.ms/cosmosdb-emulator" -FileName "C:\Azure Cosmos DB.Emulator.msi"
+    - cmd: cmd /c start /wait msiexec /i "C:\Azure Cosmos DB.Emulator.msi" /qn /quiet /norestart /log install.log
+    - ps: $DebugPreference = 'Continue'
+    - ps: Import-Module "C:\Program Files\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+    - ps: Start-CosmosDbEmulator -NoUI -Timeout 0
 before_build:
     - dotnet restore
 build_script:
     - msbuild /p:GetVersion=True /p:WriteVersionInfoToBuildLog=True
 test_script:
     - dotnet test test/Winton.DomainModelling.DocumentDb.Tests/ --no-build --configuration Release
-#    - dotnet test test/Winton.DomainModelling.DocumentDb.IntegrationTests/ --no-build --configuration Release
+    - dotnet test test/Winton.DomainModelling.DocumentDb.IntegrationTests/ --no-build --configuration Release
 artifacts:
 - path: .\**\*.nupkg
   name: NuGet
@@ -32,7 +37,3 @@ deploy:
     branch:
     - master
     - /release\/[0-9]\.[0-9]/
-
-###############################################################################################################################
-# Commented lines can be uncommented to run integration tests once AppVeyor images have updated to CosmosDB Emulator >= 2.0.0 #
-###############################################################################################################################
