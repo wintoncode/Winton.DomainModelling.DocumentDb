@@ -11,7 +11,6 @@ configuration:
 skip_tags: true
 install:
     - cmd: wmic product where name="Azure Cosmos DB Emulator" call uninstall
-    - ps: Remove-Item -Path "C:\Program Files\Azure Cosmos DB Emulator" -Recurse
     - ps: Start-FileDownload "https://aka.ms/cosmosdb-emulator" -FileName "C:\Azure Cosmos DB.Emulator.msi"
     - cmd: cmd /c start /wait msiexec /i "C:\Azure Cosmos DB.Emulator.msi" /qn /quiet /norestart /log install.log
     - ps: $DebugPreference = 'Continue'
