@@ -6,7 +6,12 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{90869527-D332-48C8-9D75-FF16E8E72973}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		.travis.yml = .travis.yml
+		appveyor.yml = appveyor.yml
+		CONTRIBUTING.md = CONTRIBUTING.md
 		GitVersionConfig.yaml = GitVersionConfig.yaml
+		icon.jpg = icon.jpg
+		LICENSE = LICENSE
 		README.md = README.md
 		stylecop.json = stylecop.json
 	EndProjectSection
