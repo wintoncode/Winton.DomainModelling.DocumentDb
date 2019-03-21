@@ -12,6 +12,7 @@ using Xunit;
 
 namespace Winton.DomainModelling.DocumentDb
 {
+    [Trait("Integration", "true")]
     public class ValueObjectDtoPersistenceTests : IDisposable
     {
         private readonly Database _database;

@@ -14,6 +14,7 @@ using Xunit;
 
 namespace Winton.DomainModelling.DocumentDb
 {
+    [Trait("Integration", "true")]
     public class EntityDtoPersistenceTests : IDisposable
     {
         private readonly Database _database;
