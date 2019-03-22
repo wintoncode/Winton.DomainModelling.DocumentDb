@@ -9,7 +9,7 @@
     <NoWarn>$(NoWarn);SA1101;SA1309</NoWarn>
     <PackageId>Winton.DomainModelling.DocumentDb</PackageId>
     <PackageIconUrl>https://raw.githubusercontent.com/wintoncode/Winton.DomainModelling.DocumentDb/master/icon.jpg</PackageIconUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/wintoncode/Winton.DomainModelling.DocumentDb/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/wintoncode/Winton.DomainModelling.DocumentDb</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <PackageTags>Winton, Domain, Driven, Design, Modelling, DDD, Persistence, DocumentDB, CosmosDB, Document, Cosmos, DB</PackageTags>
@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <AdditionalFiles Include="../../stylecop.json" />
+    <None Include="../../LICENSE" Pack="true" PackagePath=""/>
   </ItemGroup>
 
   <ItemGroup>
