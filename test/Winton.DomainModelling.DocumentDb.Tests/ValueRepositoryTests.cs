@@ -8,11 +8,11 @@ using Xunit;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    public class ValueObjectFacadeTests
+    public class ValueRepositoryTests
     {
-        public sealed class Constructor : ValueObjectFacadeTests
+        public sealed class Constructor : ValueRepositoryTests
         {
-            private static Action Constructing(Func<ValueObjectFacade<string, string>> ctor)
+            private static Action Constructing(Func<ValueRepository<string>> ctor)
             {
                 return () => ctor();
             }
@@ -24,7 +24,7 @@ namespace Winton.DomainModelling.DocumentDb
 
                 Action constructing =
                     Constructing(
-                        () => new ValueObjectFacade<string, string>(null, documentCollection, null, x => x, x => x));
+                        () => new ValueRepository<string>(null, null, documentCollection, "ValueType"));
 
                 constructing.Should().NotThrow();
             }
@@ -39,10 +39,12 @@ namespace Winton.DomainModelling.DocumentDb
 
                 Action constructing =
                     Constructing(
-                        () => new ValueObjectFacade<string, string>(null, documentCollection, null, x => x, x => x));
+                        () => new ValueRepository<string>(null, null, documentCollection, "ValueType"));
 
-                constructing.Should().Throw<NotSupportedException>()
-                            .WithMessage("Partitioned collections are not supported.");
+                constructing
+                    .Should()
+                    .Throw<NotSupportedException>()
+                    .WithMessage("Partitioned collections are not supported.");
             }
         }
     }
