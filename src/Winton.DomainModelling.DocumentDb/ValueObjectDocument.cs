@@ -24,8 +24,6 @@ namespace Winton.DomainModelling.DocumentDb
         public T Value { get; }
 
         internal static ValueObjectDocument<T> Create(string type, T value)
-        {
-            return new ValueObjectDocument<T>(null, type, value);
-        }
+            => new ValueObjectDocument<T>(null, type, value);
     }
 }

@@ -20,14 +20,11 @@ namespace Winton.DomainModelling.DocumentDb
             Database database,
             DocumentCollection documentCollection,
             string entityType,
-            Func<T, string> idSelector)
-        {
-            return new EntityRepository<T>(
+            Func<T, string> idSelector) => new EntityRepository<T>(
                 await _documentClientFactory(),
                 database,
                 documentCollection,
                 entityType,
                 idSelector);
-        }
     }
 }

@@ -22,7 +22,7 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 var documentCollection = new DocumentCollection();
 
-                Action constructing =
+                var constructing =
                     Constructing(
                         () => new ValueRepository<string>(null, null, documentCollection, "ValueType"));
 
@@ -37,7 +37,7 @@ namespace Winton.DomainModelling.DocumentDb
                     PartitionKey = new PartitionKeyDefinition { Paths = { "/id" } }
                 };
 
-                Action constructing =
+                var constructing =
                     Constructing(
                         () => new ValueRepository<string>(null, null, documentCollection, "ValueType"));
 
