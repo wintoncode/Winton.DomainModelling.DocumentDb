@@ -8,7 +8,7 @@ namespace Winton.DomainModelling.DocumentDb
     internal sealed class ValueObjectDocument<T>
     {
         [JsonConstructor]
-        private ValueObjectDocument(string id, string type, T value)
+        private ValueObjectDocument(string? id, string type, T value)
         {
             Value = value;
             Id = id;
@@ -16,7 +16,7 @@ namespace Winton.DomainModelling.DocumentDb
         }
 
         [JsonProperty(PropertyName = "id")]
-        public string Id { get; }
+        public string? Id { get; }
 
         public string Type { get; }
 

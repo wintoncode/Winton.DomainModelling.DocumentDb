@@ -55,7 +55,7 @@ namespace Winton.DomainModelling.DocumentDb
             await _documentClient.UpsertDocumentAsync(GetUri(), EntityDocument<T>.Create(id, _entityType, entity));
         }
 
-        public IEnumerable<T> Query(Expression<Func<T, bool>> predicate = null)
+        public IEnumerable<T> Query(Expression<Func<T, bool>>? predicate = null)
             => _documentClient
                 .CreateDocumentQuery<EntityDocument<T>>(GetUri())
                 .Where(x => x.Type == _entityType)
@@ -72,7 +72,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
             catch (DocumentClientException dce) when (dce.StatusCode == HttpStatusCode.NotFound)
             {
-                return default;
+                return default!;
             }
         }
 

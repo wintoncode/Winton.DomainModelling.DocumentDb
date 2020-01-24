@@ -1,7 +1,4 @@
-﻿// Copyright (c) Winton. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,8 +21,13 @@ namespace Winton.DomainModelling.DocumentDb
 
         public ValueObjectPersistenceTests()
         {
-            var uri = Environment.GetEnvironmentVariable("DOCUMENT_DB_URI");
-            var key = Environment.GetEnvironmentVariable("DOCUMENT_DB_KEY");
+            static string GetRequiredEnvironmentVariable(string key)
+            {
+                return Environment.GetEnvironmentVariable(key) ?? throw new Exception($"{key} is not set");
+            }
+
+            var uri = GetRequiredEnvironmentVariable("DOCUMENT_DB_URI");
+            var key = GetRequiredEnvironmentVariable("DOCUMENT_DB_KEY");
 
             _documentClient = new DocumentClient(new Uri(uri), key);
             _database = new Database { Id = nameof(EntityPersistenceTests) };
@@ -192,15 +194,7 @@ namespace Winton.DomainModelling.DocumentDb
 
             public bool Equals(OtherTestValueObject other) => Value == other?.Value;
 
-            public override bool Equals(object obj)
-            {
-                if (obj is null)
-                {
-                    return false;
-                }
-
-                return obj is OtherTestValueObject o && Equals(o);
-            }
+            public override bool Equals(object? obj) => !(obj is null) && obj is OtherTestValueObject o && Equals(o);
 
             public override int GetHashCode() => Value;
         }
@@ -217,15 +211,7 @@ namespace Winton.DomainModelling.DocumentDb
 
             public bool Equals(TestValueObject other) => Value == other?.Value;
 
-            public override bool Equals(object obj)
-            {
-                if (obj is null)
-                {
-                    return false;
-                }
-
-                return obj is TestValueObject o && Equals(o);
-            }
+            public override bool Equals(object? obj) => !(obj is null) && obj is TestValueObject o && Equals(o);
 
             public override int GetHashCode() => Value;
         }

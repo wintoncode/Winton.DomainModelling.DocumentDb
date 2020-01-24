@@ -10,10 +10,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
 		CONTRIBUTING.md = CONTRIBUTING.md
+		Directory.Build.props = Directory.Build.props
 		GitVersion.yml = GitVersion.yml
 		icon.jpg = icon.jpg
 		LICENSE = LICENSE
 		README.md = README.md
+		Rules.ruleset = Rules.ruleset
 		stylecop.json = stylecop.json
 		Winton.DomainModelling.DocumentDb.sln.DotSettings = Winton.DomainModelling.DocumentDb.sln.DotSettings
 	EndProjectSection
@@ -21,6 +23,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B70E1756-208C-4D97-9C84-CFE1625977FF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8BDE761F-4C37-4AE9-93C5-482FB9F533AD}"
+	ProjectSection(SolutionItems) = preProject
+		test\Directory.Build.props = test\Directory.Build.props
+		test\Rules.ruleset = test\Rules.ruleset
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Winton.DomainModelling.DocumentDb", "src\Winton.DomainModelling.DocumentDb\Winton.DomainModelling.DocumentDb.csproj", "{23C5B1FF-7F50-4C40-BA2D-3177B14F46DD}"
 EndProject

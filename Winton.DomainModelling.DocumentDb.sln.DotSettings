@@ -1,7 +1,4 @@
-<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                        xmlns:s="clr-namespace:System;assembly=mscorlib"
-                        xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml"
-                        xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:String x:Key="/Default/CodeStyle/CSharpFileLayoutPatterns/Pattern/@EntryValue">&lt;?xml version="1.0" encoding="utf-16"?&gt;&#xD;
 &lt;Patterns xmlns="urn:schemas-jetbrains-com:member-reordering-patterns"&gt;&#xD;
   &lt;TypePattern Priority="2000" DisplayName="COM interfaces"&gt;&#xD;
@@ -48,7 +45,7 @@
       &lt;/Entry.Match&gt;&#xD;
     &lt;/Entry&gt;&#xD;
     &lt;Entry DisplayName="All other members" /&gt;&#xD;
-    &lt;Entry Priority="100" DisplayName="Test Methods"&gt;&#xD;
+    &lt;Entry DisplayName="Test Methods" Priority="100"&gt;&#xD;
       &lt;Entry.Match&gt;&#xD;
         &lt;And&gt;&#xD;
           &lt;Kind Is="Method" /&gt;&#xD;
@@ -101,7 +98,7 @@
         &lt;Name /&gt;&#xD;
       &lt;/Entry.SortBy&gt;&#xD;
     &lt;/Entry&gt;&#xD;
-    &lt;Entry Priority="200" DisplayName="Constructors and destructors"&gt;&#xD;
+    &lt;Entry DisplayName="Constructors and destructors" Priority="200"&gt;&#xD;
       &lt;Entry.Match&gt;&#xD;
         &lt;Or&gt;&#xD;
           &lt;Kind Is="Constructor" /&gt;&#xD;
@@ -212,7 +209,7 @@
         &lt;Name /&gt;&#xD;
       &lt;/Entry.SortBy&gt;&#xD;
     &lt;/Entry&gt;&#xD;
-    &lt;Entry Priority="1000" DisplayName="Public indexers"&gt;&#xD;
+    &lt;Entry DisplayName="Public indexers" Priority="1000"&gt;&#xD;
       &lt;Entry.Match&gt;&#xD;
         &lt;And&gt;&#xD;
           &lt;Kind Is="Indexer" /&gt;&#xD;
@@ -225,7 +222,7 @@
         &lt;Name /&gt;&#xD;
       &lt;/Entry.SortBy&gt;&#xD;
     &lt;/Entry&gt;&#xD;
-    &lt;Entry Priority="1000" DisplayName="Interface indexers"&gt;&#xD;
+    &lt;Entry DisplayName="Interface indexers" Priority="1000"&gt;&#xD;
       &lt;Entry.Match&gt;&#xD;
         &lt;And&gt;&#xD;
           &lt;Kind Is="Indexer" /&gt;&#xD;
@@ -237,7 +234,7 @@
         &lt;Name /&gt;&#xD;
       &lt;/Entry.SortBy&gt;&#xD;
     &lt;/Entry&gt;&#xD;
-    &lt;Entry Priority="1000" DisplayName="Other indexers"&gt;&#xD;
+    &lt;Entry DisplayName="Other indexers" Priority="1000"&gt;&#xD;
       &lt;Entry.Match&gt;&#xD;
         &lt;Kind Is="Indexer" /&gt;&#xD;
       &lt;/Entry.Match&gt;&#xD;
@@ -326,7 +323,7 @@
         &lt;Name /&gt;&#xD;
       &lt;/Entry.SortBy&gt;&#xD;
     &lt;/Entry&gt;&#xD;
-    &lt;Entry Priority="600" DisplayName="Nested structs"&gt;&#xD;
+    &lt;Entry DisplayName="Nested structs" Priority="600"&gt;&#xD;
       &lt;Entry.Match&gt;&#xD;
         &lt;Kind Is="Struct" /&gt;&#xD;
       &lt;/Entry.Match&gt;&#xD;
@@ -336,7 +333,7 @@
         &lt;Name /&gt;&#xD;
       &lt;/Entry.SortBy&gt;&#xD;
     &lt;/Entry&gt;&#xD;
-    &lt;Entry Priority="700" DisplayName="Nested classes"&gt;&#xD;
+    &lt;Entry DisplayName="Nested classes" Priority="700"&gt;&#xD;
       &lt;Entry.Match&gt;&#xD;
         &lt;Kind Is="Class" /&gt;&#xD;
       &lt;/Entry.Match&gt;&#xD;
@@ -349,5 +346,6 @@
     &lt;Entry DisplayName="All other members" /&gt;&#xD;
   &lt;/TypePattern&gt;&#xD;
 &lt;/Patterns&gt;</s:String>
+	<s:Boolean x:Key="/Default/Environment/SettingsMigration/IsMigratorApplied/=JetBrains_002EReSharper_002EPsi_002ECSharp_002ECodeStyle_002ESettingsUpgrade_002EAlwaysTreatStructAsNotReorderableMigration/@EntryIndexedValue">True</s:Boolean>
 	
 </wpf:ResourceDictionary>

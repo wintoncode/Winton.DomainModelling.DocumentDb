@@ -1,9 +1,7 @@
-﻿// Copyright (c) Winton. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-using System;
+﻿using System;
 using FluentAssertions;
 using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
 using Xunit;
 
 namespace Winton.DomainModelling.DocumentDb
@@ -24,7 +22,11 @@ namespace Winton.DomainModelling.DocumentDb
 
                 var constructing =
                     Constructing(
-                        () => new ValueRepository<string>(null, null, documentCollection, "ValueType"));
+                        () => new ValueRepository<string>(
+                            new DocumentClient(new Uri("https://example.com"), string.Empty),
+                            new Database(),
+                            documentCollection,
+                            "ValueType"));
 
                 constructing.Should().NotThrow();
             }
@@ -39,7 +41,12 @@ namespace Winton.DomainModelling.DocumentDb
 
                 var constructing =
                     Constructing(
-                        () => new ValueRepository<string>(null, null, documentCollection, "ValueType"));
+                        () =>
+                            new ValueRepository<string>(
+                                new DocumentClient(new Uri("https://example.com"), string.Empty),
+                                new Database(),
+                                documentCollection,
+                                "ValueType"));
 
                 constructing
                     .Should()
