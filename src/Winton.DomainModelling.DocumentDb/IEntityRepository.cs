@@ -41,7 +41,7 @@ namespace Winton.DomainModelling.DocumentDb
         /// </remarks>
         /// <param name="predicate">An optional predicate to filter the results by.</param>
         /// <returns>An <see cref="IEnumerable{T}" /> of the entities that match the predicate.</returns>
-        IEnumerable<T> Query(Expression<Func<T, bool>> predicate = null);
+        IEnumerable<T> Query(Expression<Func<T, bool>>? predicate = null);
 
         /// <summary>
         ///     Read an entity of a specified type by id.

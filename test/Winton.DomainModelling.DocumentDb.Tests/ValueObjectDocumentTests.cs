@@ -1,7 +1,4 @@
-﻿// Copyright (c) Winton. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-using System;
+﻿using System;
 using FluentAssertions;
 using Newtonsoft.Json;
 using Xunit;
@@ -72,15 +69,7 @@ namespace Winton.DomainModelling.DocumentDb
 
             public bool Equals(TestValueObject other) => string.Equals(Name, other?.Name);
 
-            public override bool Equals(object obj)
-            {
-                if (obj is null)
-                {
-                    return false;
-                }
-
-                return obj is TestValueObject o && Equals(o);
-            }
+            public override bool Equals(object? obj) => !(obj is null) && obj is TestValueObject o && Equals(o);
 
             public override int GetHashCode() => Name?.GetHashCode() ?? 0;
         }

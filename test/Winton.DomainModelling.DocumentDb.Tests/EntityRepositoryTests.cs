@@ -1,9 +1,7 @@
-﻿// Copyright (c) Winton. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-using System;
+﻿using System;
 using FluentAssertions;
 using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
 using Xunit;
 
 namespace Winton.DomainModelling.DocumentDb
@@ -26,8 +24,8 @@ namespace Winton.DomainModelling.DocumentDb
                     Constructing(
                         () =>
                             new EntityRepository<TestEntity>(
-                                null,
-                                null,
+                                new DocumentClient(new Uri("https://example.com"), string.Empty),
+                                new Database(),
                                 documentCollection,
                                 "TestEntity",
                                 entity => entity.Id));
@@ -47,8 +45,8 @@ namespace Winton.DomainModelling.DocumentDb
                     Constructing(
                         () =>
                             new EntityRepository<TestEntity>(
-                                null,
-                                null,
+                                new DocumentClient(new Uri("https://example.com"), string.Empty),
+                                new Database(),
                                 documentCollection,
                                 "TestEntity",
                                 entity => entity.Id));

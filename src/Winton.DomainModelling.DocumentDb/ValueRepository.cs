@@ -38,9 +38,11 @@ namespace Winton.DomainModelling.DocumentDb
 
         public async Task Delete(T value)
         {
-            if (Get(value) != null)
+            var document = Get(value);
+            if (document != null)
             {
-                await _documentClient.DeleteDocumentAsync(GetUri(Get(value).Id));
+                await _documentClient.DeleteDocumentAsync(
+                    GetUri(document.Id ?? throw new ArgumentNullException(document.Id)));
             }
         }
 
@@ -52,7 +54,7 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        public IEnumerable<T> Query(Expression<Func<T, bool>> predicate = null)
+        public IEnumerable<T> Query(Expression<Func<T, bool>>? predicate = null)
             => CreateValueObjectDocumentQuery()
                 .Select(x => x.Value)
                 .Where(predicate ?? (x => true))
