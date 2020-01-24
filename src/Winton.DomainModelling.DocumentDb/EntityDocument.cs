@@ -23,13 +23,8 @@ namespace Winton.DomainModelling.DocumentDb
         public string Type { get; }
 
         internal static EntityDocument<T> Create(string id, string type, T entity)
-        {
-            return new EntityDocument<T>(CreateId(id, type), type, entity);
-        }
+            => new EntityDocument<T>(CreateId(id, type), type, entity);
 
-        internal static string CreateId(string id, string type)
-        {
-            return $"{type}_{id}";
-        }
+        internal static string CreateId(string id, string type) => $"{type}_{id}";
     }
 }

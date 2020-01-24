@@ -22,7 +22,7 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 var documentCollection = new DocumentCollection();
 
-                Action constructing =
+                var constructing =
                     Constructing(
                         () =>
                             new EntityRepository<TestEntity>(
@@ -43,7 +43,7 @@ namespace Winton.DomainModelling.DocumentDb
                     PartitionKey = new PartitionKeyDefinition { Paths = { "/id" } }
                 };
 
-                Action constructing =
+                var constructing =
                     Constructing(
                         () =>
                             new EntityRepository<TestEntity>(

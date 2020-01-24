@@ -16,7 +16,7 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 var document = EntityDocument<TestEntity>.Create("1", "TestEntity", new TestEntity("1"));
 
-                TestEntity entity = document.Entity;
+                var entity = document.Entity;
 
                 entity.Should().BeEquivalentTo(new TestEntity("1"));
             }
@@ -27,7 +27,7 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldReturnEntityTypeAndEntityId()
             {
-                string id = EntityDocument<TestEntity>.CreateId("1", "TestEntity");
+                var id = EntityDocument<TestEntity>.CreateId("1", "TestEntity");
 
                 id.Should().Be("TestEntity_1");
             }
@@ -40,7 +40,7 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 var document = EntityDocument<TestEntity>.Create("1", "TestEntity", new TestEntity("1"));
 
-                string id = document.Id;
+                var id = document.Id;
 
                 id.Should().Be("TestEntity_1");
             }
@@ -74,7 +74,7 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 var document = EntityDocument<TestEntity>.Create("1", "TestEntity", new TestEntity("1"));
 
-                string serialised = JsonConvert.SerializeObject(document);
+                var serialised = JsonConvert.SerializeObject(document);
 
                 JsonConvert.DeserializeObject<EntityDocument<TestEntity>>(serialised)
                            .Should()
@@ -89,7 +89,7 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 var document = EntityDocument<TestEntity>.Create("1", "TestEntity", new TestEntity("1"));
 
-                string type = document.Type;
+                var type = document.Type;
 
                 type.Should().Be("TestEntity");
             }

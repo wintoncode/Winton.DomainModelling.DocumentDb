@@ -10,37 +10,6 @@ namespace Winton.DomainModelling.DocumentDb
 {
     public class ValueObjectDocumentTests
     {
-        public class TestValueObject : IEquatable<TestValueObject>
-        {
-            public TestValueObject(string name)
-            {
-                Name = name;
-            }
-
-            // ReSharper disable once MemberCanBePrivate.Local
-            public string Name { get; }
-
-            public bool Equals(TestValueObject other)
-            {
-                return string.Equals(Name, other?.Name);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (obj is null)
-                {
-                    return false;
-                }
-
-                return obj is TestValueObject o && Equals(o);
-            }
-
-            public override int GetHashCode()
-            {
-                return Name?.GetHashCode() ?? 0;
-            }
-        }
-
         public sealed class Id : ValueObjectDocumentTests
         {
             [Fact]
@@ -48,7 +17,7 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 var document = ValueObjectDocument<TestValueObject>.Create("TestValueObject", new TestValueObject("A"));
 
-                string id = document.Id;
+                var id = document.Id;
 
                 id.Should().BeNull();
             }
@@ -74,7 +43,8 @@ namespace Winton.DomainModelling.DocumentDb
 
                 document
                     .Should()
-                    .BeEquivalentTo(ValueObjectDocument<TestValueObject>.Create("TestValueObject", new TestValueObject("A")));
+                    .BeEquivalentTo(
+                        ValueObjectDocument<TestValueObject>.Create("TestValueObject", new TestValueObject("A")));
             }
 
             [Fact]
@@ -82,12 +52,37 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 var document = ValueObjectDocument<TestValueObject>.Create("TestValueObject", new TestValueObject("A"));
 
-                string serialised = JsonConvert.SerializeObject(document);
+                var serialised = JsonConvert.SerializeObject(document);
 
                 JsonConvert.DeserializeObject<ValueObjectDocument<TestValueObject>>(serialised)
-                    .Should()
-                    .BeEquivalentTo(document);
+                           .Should()
+                           .BeEquivalentTo(document);
             }
+        }
+
+        public class TestValueObject : IEquatable<TestValueObject>
+        {
+            public TestValueObject(string name)
+            {
+                Name = name;
+            }
+
+            // ReSharper disable once MemberCanBePrivate.Local
+            public string Name { get; }
+
+            public bool Equals(TestValueObject other) => string.Equals(Name, other?.Name);
+
+            public override bool Equals(object obj)
+            {
+                if (obj is null)
+                {
+                    return false;
+                }
+
+                return obj is TestValueObject o && Equals(o);
+            }
+
+            public override int GetHashCode() => Name?.GetHashCode() ?? 0;
         }
 
         public sealed class Type : ValueObjectDocumentTests
@@ -97,7 +92,7 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 var document = ValueObjectDocument<TestValueObject>.Create("TestValueObject", new TestValueObject("A"));
 
-                string type = document.Type;
+                var type = document.Type;
 
                 type.Should().Be("TestValueObject");
             }
@@ -110,7 +105,7 @@ namespace Winton.DomainModelling.DocumentDb
             {
                 var document = ValueObjectDocument<TestValueObject>.Create("TestValueObject", new TestValueObject("A"));
 
-                TestValueObject value = document.Value;
+                var value = document.Value;
 
                 value.Should().Be(new TestValueObject("A"));
             }

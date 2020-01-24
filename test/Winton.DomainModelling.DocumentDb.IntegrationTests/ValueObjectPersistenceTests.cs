@@ -24,8 +24,8 @@ namespace Winton.DomainModelling.DocumentDb
 
         public ValueObjectPersistenceTests()
         {
-            string uri = Environment.GetEnvironmentVariable("DOCUMENT_DB_URI");
-            string key = Environment.GetEnvironmentVariable("DOCUMENT_DB_KEY");
+            var uri = Environment.GetEnvironmentVariable("DOCUMENT_DB_URI");
+            var key = Environment.GetEnvironmentVariable("DOCUMENT_DB_KEY");
 
             _documentClient = new DocumentClient(new Uri(uri), key);
             _database = new Database { Id = nameof(EntityPersistenceTests) };
@@ -35,7 +35,7 @@ namespace Winton.DomainModelling.DocumentDb
                 .AddDomainModellingDocumentDb(
                     async _ =>
                     {
-                        ResourceResponse<Database> databaseResponse = await _documentClient
+                        var databaseResponse = await _documentClient
                             .CreateDatabaseIfNotExistsAsync(_database);
 
                         await _documentClient
@@ -52,7 +52,7 @@ namespace Winton.DomainModelling.DocumentDb
 
         public void Dispose()
         {
-            Database database = _documentClient
+            var database = _documentClient
                 .CreateDatabaseIfNotExistsAsync(_database)
                 .GetAwaiter()
                 .GetResult()
@@ -65,7 +65,7 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldDeleteValueObject()
             {
-                IValueRepository<TestValueObject> valueRepository =
+                var valueRepository =
                     await _valueRepositoryFactory.Create<TestValueObject>(
                         _database,
                         _documentCollection,
@@ -76,7 +76,7 @@ namespace Winton.DomainModelling.DocumentDb
 
                 await valueRepository.Delete(valueObject);
 
-                IEnumerable<TestValueObject> queriedValueObjects = valueRepository.Query();
+                var queriedValueObjects = valueRepository.Query();
 
                 queriedValueObjects.Should().BeEmpty();
             }
@@ -84,7 +84,7 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldNotThrowIfValueObjectDoesNotExist()
             {
-                IValueRepository<TestValueObject> valueRepository =
+                var valueRepository =
                     await _valueRepositoryFactory.Create<TestValueObject>(
                         _database,
                         _documentCollection,
@@ -101,7 +101,7 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldCreateValueObjectIfItDoesNotExist()
             {
-                IValueRepository<TestValueObject> valueRepository =
+                var valueRepository =
                     await _valueRepositoryFactory.Create<TestValueObject>(
                         _database,
                         _documentCollection,
@@ -110,7 +110,7 @@ namespace Winton.DomainModelling.DocumentDb
                 var valueObject = new TestValueObject(1);
                 await valueRepository.Put(valueObject);
 
-                IEnumerable<TestValueObject> queriedValueObjects = valueRepository.Query();
+                var queriedValueObjects = valueRepository.Query();
 
                 queriedValueObjects.Should().BeEquivalentTo(new List<TestValueObject> { valueObject });
             }
@@ -118,7 +118,7 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldNotCreateAnotherValueObjectIfItAlreadyExists()
             {
-                IValueRepository<TestValueObject> valueRepository =
+                var valueRepository =
                     await _valueRepositoryFactory.Create<TestValueObject>(
                         _database,
                         _documentCollection,
@@ -128,7 +128,7 @@ namespace Winton.DomainModelling.DocumentDb
                 await valueRepository.Put(valueObject);
                 await valueRepository.Put(valueObject);
 
-                IEnumerable<TestValueObject> queriedValueObjects = valueRepository.Query();
+                var queriedValueObjects = valueRepository.Query();
 
                 queriedValueObjects.Should().BeEquivalentTo(new List<TestValueObject> { valueObject });
             }
@@ -139,12 +139,12 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldQueryValueObjectsOfCorrectType()
             {
-                IValueRepository<TestValueObject> valueRepository =
+                var valueRepository =
                     await _valueRepositoryFactory.Create<TestValueObject>(
                         _database,
                         _documentCollection,
                         "TestEntity");
-                IValueRepository<OtherTestValueObject> otherValueRepository =
+                var otherValueRepository =
                     await _valueRepositoryFactory.Create<OtherTestValueObject>(
                         _database,
                         _documentCollection,
@@ -167,7 +167,7 @@ namespace Winton.DomainModelling.DocumentDb
                 await Task.WhenAll(valueObjects.Select(valueRepository.Put));
                 await Task.WhenAll(otherValueObjects.Select(otherValueRepository.Put));
 
-                IEnumerable<TestValueObject> queriedValueObjects = valueRepository.Query(vo => vo.Value > 1);
+                var queriedValueObjects = valueRepository.Query(vo => vo.Value > 1);
 
                 queriedValueObjects
                     .Should()
@@ -190,10 +190,7 @@ namespace Winton.DomainModelling.DocumentDb
 
             public int Value { get; }
 
-            public bool Equals(OtherTestValueObject other)
-            {
-                return Value == other?.Value;
-            }
+            public bool Equals(OtherTestValueObject other) => Value == other?.Value;
 
             public override bool Equals(object obj)
             {
@@ -205,10 +202,7 @@ namespace Winton.DomainModelling.DocumentDb
                 return obj is OtherTestValueObject o && Equals(o);
             }
 
-            public override int GetHashCode()
-            {
-                return Value;
-            }
+            public override int GetHashCode() => Value;
         }
 
         private class TestValueObject : IEquatable<TestValueObject>
@@ -221,10 +215,7 @@ namespace Winton.DomainModelling.DocumentDb
 
             public int Value { get; }
 
-            public bool Equals(TestValueObject other)
-            {
-                return Value == other?.Value;
-            }
+            public bool Equals(TestValueObject other) => Value == other?.Value;
 
             public override bool Equals(object obj)
             {
@@ -236,10 +227,7 @@ namespace Winton.DomainModelling.DocumentDb
                 return obj is TestValueObject o && Equals(o);
             }
 
-            public override int GetHashCode()
-            {
-                return Value;
-            }
+            public override int GetHashCode() => Value;
         }
     }
 }

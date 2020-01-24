@@ -46,7 +46,7 @@ namespace Winton.DomainModelling.DocumentDb
 
         public async Task Put(T entity)
         {
-            string id = _idSelector(entity);
+            var id = _idSelector(entity);
             if (string.IsNullOrWhiteSpace(id))
             {
                 throw new NotSupportedException("An id must be specified to put.");
@@ -56,19 +56,17 @@ namespace Winton.DomainModelling.DocumentDb
         }
 
         public IEnumerable<T> Query(Expression<Func<T, bool>> predicate = null)
-        {
-            return _documentClient
+            => _documentClient
                 .CreateDocumentQuery<EntityDocument<T>>(GetUri())
                 .Where(x => x.Type == _entityType)
                 .Select(x => x.Entity)
                 .Where(predicate ?? (x => true));
-        }
 
         public async Task<T> Read(string id)
         {
             try
             {
-                ResourceResponse<Document> response = await _documentClient.ReadDocumentAsync(GetUri(id));
+                var response = await _documentClient.ReadDocumentAsync(GetUri(id));
                 EntityDocument<T> responseDocument = (dynamic)response.Resource;
                 return responseDocument.Entity;
             }
@@ -78,17 +76,11 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        private Uri GetUri()
-        {
-            return UriFactory.CreateDocumentCollectionUri(_database.Id, _documentCollection.Id);
-        }
+        private Uri GetUri() => UriFactory.CreateDocumentCollectionUri(_database.Id, _documentCollection.Id);
 
-        private Uri GetUri(string id)
-        {
-            return UriFactory.CreateDocumentUri(
-                _database.Id,
-                _documentCollection.Id,
-                EntityDocument<T>.CreateId(id, _entityType));
-        }
+        private Uri GetUri(string id) => UriFactory.CreateDocumentUri(
+            _database.Id,
+            _documentCollection.Id,
+            EntityDocument<T>.CreateId(id, _entityType));
     }
 }

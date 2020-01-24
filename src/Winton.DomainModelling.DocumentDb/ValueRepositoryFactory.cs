@@ -21,8 +21,6 @@ namespace Winton.DomainModelling.DocumentDb
             DocumentCollection documentCollection,
             string valueType)
             where T : IEquatable<T>
-        {
-            return new ValueRepository<T>(await _documentClientFactory(), database, documentCollection, valueType);
-        }
+            => new ValueRepository<T>(await _documentClientFactory(), database, documentCollection, valueType);
     }
 }

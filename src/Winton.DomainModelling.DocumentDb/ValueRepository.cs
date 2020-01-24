@@ -53,35 +53,23 @@ namespace Winton.DomainModelling.DocumentDb
         }
 
         public IEnumerable<T> Query(Expression<Func<T, bool>> predicate = null)
-        {
-            return CreateValueObjectDocumentQuery()
+            => CreateValueObjectDocumentQuery()
                 .Select(x => x.Value)
                 .Where(predicate ?? (x => true))
                 .AsEnumerable();
-        }
 
         private IQueryable<ValueObjectDocument<T>> CreateValueObjectDocumentQuery()
-        {
-            return _documentClient
+            => _documentClient
                 .CreateDocumentQuery<ValueObjectDocument<T>>(GetUri())
                 .Where(x => x.Type == _valueType);
-        }
 
         private ValueObjectDocument<T> Get(T value)
-        {
-            return CreateValueObjectDocumentQuery()
+            => CreateValueObjectDocumentQuery()
                 .AsEnumerable()
                 .SingleOrDefault(x => x.Value.Equals(value));
-        }
 
-        private Uri GetUri()
-        {
-            return UriFactory.CreateDocumentCollectionUri(_database.Id, _documentCollection.Id);
-        }
+        private Uri GetUri() => UriFactory.CreateDocumentCollectionUri(_database.Id, _documentCollection.Id);
 
-        private Uri GetUri(string id)
-        {
-            return UriFactory.CreateDocumentUri(_database.Id, _documentCollection.Id, id);
-        }
+        private Uri GetUri(string id) => UriFactory.CreateDocumentUri(_database.Id, _documentCollection.Id, id);
     }
 }

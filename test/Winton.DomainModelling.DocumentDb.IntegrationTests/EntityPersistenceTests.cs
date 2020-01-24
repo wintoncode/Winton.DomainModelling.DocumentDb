@@ -23,8 +23,8 @@ namespace Winton.DomainModelling.DocumentDb
 
         public EntityPersistenceTests()
         {
-            string uri = Environment.GetEnvironmentVariable("DOCUMENT_DB_URI");
-            string key = Environment.GetEnvironmentVariable("DOCUMENT_DB_KEY");
+            var uri = Environment.GetEnvironmentVariable("DOCUMENT_DB_URI");
+            var key = Environment.GetEnvironmentVariable("DOCUMENT_DB_KEY");
 
             _documentClient = new DocumentClient(new Uri(uri), key);
             _database = new Database { Id = nameof(EntityPersistenceTests) };
@@ -34,7 +34,7 @@ namespace Winton.DomainModelling.DocumentDb
                 .AddDomainModellingDocumentDb(
                     async _ =>
                     {
-                        ResourceResponse<Database> databaseResponse = await _documentClient
+                        var databaseResponse = await _documentClient
                             .CreateDatabaseIfNotExistsAsync(_database);
 
                         await _documentClient
@@ -63,19 +63,18 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldDeleteEntity()
             {
-                IEntityRepository<TestEntity> entityRepository =
+                var entityRepository =
                     await _entityRepositoryFactory.Create<TestEntity>(
                         _database,
                         _documentCollection,
                         "TestEntity",
                         e => e.Id);
 
-                var createdEntity = new TestEntity("A", 1);
-                await entityRepository.Put(createdEntity);
+                await entityRepository.Put(new TestEntity("A", 1));
 
                 await entityRepository.Delete("A");
 
-                TestEntity deletedEntity = await entityRepository.Read("A");
+                var deletedEntity = await entityRepository.Read("A");
 
                 deletedEntity.Should().BeNull();
             }
@@ -86,7 +85,7 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldCreateEntity()
             {
-                IEntityRepository<TestEntity> entityRepository =
+                var entityRepository =
                     await _entityRepositoryFactory.Create<TestEntity>(
                         _database,
                         _documentCollection,
@@ -96,7 +95,7 @@ namespace Winton.DomainModelling.DocumentDb
                 var entity = new TestEntity("A", 1);
                 await entityRepository.Put(entity);
 
-                TestEntity createdEntity = await entityRepository.Read("A");
+                var createdEntity = await entityRepository.Read("A");
 
                 createdEntity.Should().BeEquivalentTo(entity);
             }
@@ -104,16 +103,14 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldThrowIfIdUnset()
             {
-                IEntityRepository<TestEntity> entityRepository =
+                var entityRepository =
                     await _entityRepositoryFactory.Create<TestEntity>(
                         _database,
                         _documentCollection,
                         "TestEntity",
                         e => e.Id);
 
-                var entity = new TestEntity(default, 1);
-
-                Func<Task> action = entityRepository.Awaiting(ef => ef.Put(entity));
+                var action = entityRepository.Awaiting(ef => ef.Put(new TestEntity(default, 1)));
 
                 action
                     .Should()
@@ -124,7 +121,7 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldUpdateEntity()
             {
-                IEntityRepository<TestEntity> entityRepository =
+                var entityRepository =
                     await _entityRepositoryFactory.Create<TestEntity>(
                         _database,
                         _documentCollection,
@@ -136,7 +133,7 @@ namespace Winton.DomainModelling.DocumentDb
                 var entity = new TestEntity("A", 2);
                 await entityRepository.Put(entity);
 
-                TestEntity updatedEntity = await entityRepository.Read("A");
+                var updatedEntity = await entityRepository.Read("A");
 
                 updatedEntity.Should().BeEquivalentTo(entity);
             }
@@ -147,13 +144,13 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldQueryEntitiesOfCorrectType()
             {
-                IEntityRepository<TestEntity> entityRepository =
+                var entityRepository =
                     await _entityRepositoryFactory.Create<TestEntity>(
                         _database,
                         _documentCollection,
                         "TestEntity",
                         e => e.Id);
-                IEntityRepository<OtherTestEntity> otherEntityRepository =
+                var otherEntityRepository =
                     await _entityRepositoryFactory.Create<OtherTestEntity>(
                         _database,
                         _documentCollection,
@@ -177,7 +174,7 @@ namespace Winton.DomainModelling.DocumentDb
                 await Task.WhenAll(entities.Select(entityRepository.Put));
                 await Task.WhenAll(otherEntities.Select(otherEntityRepository.Put));
 
-                IEnumerable<TestEntity> queriedEntities = entityRepository.Query(e => e.Value > 1);
+                var queriedEntities = entityRepository.Query(e => e.Value > 1);
 
                 queriedEntities
                     .Should()
@@ -195,13 +192,13 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldReturnEntityById()
             {
-                IEntityRepository<TestEntity> entityRepository =
+                var entityRepository =
                     await _entityRepositoryFactory.Create<TestEntity>(
                         _database,
                         _documentCollection,
                         "TestEntity",
                         e => e.Id);
-                IEntityRepository<OtherTestEntity> otherEntityRepository =
+                var otherEntityRepository =
                     await _entityRepositoryFactory.Create<OtherTestEntity>(
                         _database,
                         _documentCollection,
@@ -213,7 +210,7 @@ namespace Winton.DomainModelling.DocumentDb
                 await entityRepository.Put(new TestEntity("B", 2));
                 await otherEntityRepository.Put(new OtherTestEntity("A", 3));
 
-                TestEntity readEntity = await entityRepository.Read("A");
+                var readEntity = await entityRepository.Read("A");
 
                 readEntity.Should().BeEquivalentTo(entity);
             }
@@ -221,13 +218,13 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private async Task ShouldReturnNullIfEntityWithIdNotFound()
             {
-                IEntityRepository<TestEntity> entityRepository =
+                var entityRepository =
                     await _entityRepositoryFactory.Create<TestEntity>(
                         _database,
                         _documentCollection,
                         "TestEntity",
                         e => e.Id);
-                IEntityRepository<OtherTestEntity> otherEntityRepository =
+                var otherEntityRepository =
                     await _entityRepositoryFactory.Create<OtherTestEntity>(
                         _database,
                         _documentCollection,
@@ -238,7 +235,7 @@ namespace Winton.DomainModelling.DocumentDb
 
                 await otherEntityRepository.Put(new OtherTestEntity("A", 3));
 
-                TestEntity readEntity = await entityRepository.Read("A");
+                var readEntity = await entityRepository.Read("A");
 
                 readEntity.Should().BeNull();
             }
