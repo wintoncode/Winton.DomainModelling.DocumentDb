@@ -8,11 +8,11 @@ using Xunit;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    public class EntityFacadeTests
+    public class EntityRepositoryTests
     {
-        public sealed class Constructor : EntityFacadeTests
+        public sealed class Constructor : EntityRepositoryTests
         {
-            private static Action Constructing(Func<EntityFacade<TestEntity, string, TestEntity>> ctor)
+            private static Action Constructing(Func<EntityRepository<TestEntity>> ctor)
             {
                 return () => ctor();
             }
@@ -25,12 +25,12 @@ namespace Winton.DomainModelling.DocumentDb
                 Action constructing =
                     Constructing(
                         () =>
-                            new EntityFacade<TestEntity, string, TestEntity>(
+                            new EntityRepository<TestEntity>(
+                                null,
                                 null,
                                 documentCollection,
-                                null,
-                                x => x,
-                                x => x));
+                                "TestEntity",
+                                entity => entity.Id));
 
                 constructing.Should().NotThrow();
             }
@@ -46,25 +46,29 @@ namespace Winton.DomainModelling.DocumentDb
                 Action constructing =
                     Constructing(
                         () =>
-                            new EntityFacade<TestEntity, string, TestEntity>(
+                            new EntityRepository<TestEntity>(
+                                null,
                                 null,
                                 documentCollection,
-                                null,
-                                x => x,
-                                x => x));
+                                "TestEntity",
+                                entity => entity.Id));
 
-                constructing.Should().Throw<NotSupportedException>()
-                            .WithMessage("Partitioned collections are not supported.");
+                constructing
+                    .Should()
+                    .Throw<NotSupportedException>()
+                    .WithMessage("Partitioned collections are not supported.");
             }
         }
 
         // ReSharper disable once ClassNeverInstantiated.Local
-        private sealed class TestEntity : Entity<string>
+        private sealed class TestEntity
         {
             public TestEntity(string id)
-                : base(id)
             {
+                Id = id;
             }
+
+            public string Id { get; }
         }
     }
 }

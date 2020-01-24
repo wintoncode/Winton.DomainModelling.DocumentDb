@@ -10,31 +10,19 @@ namespace Winton.DomainModelling.DocumentDb
 {
     public class ValueObjectDocumentTests
     {
-        private struct TestDto
+        public class TestValueObject : IEquatable<TestValueObject>
         {
-            public TestDto(string value)
+            public TestValueObject(string name)
             {
-                Value = value;
+                Name = name;
             }
 
             // ReSharper disable once MemberCanBePrivate.Local
-            // ReSharper disable once UnusedAutoPropertyAccessor.Local
-            public string Value { get; }
-        }
-
-        private struct TestValueObject : IEquatable<TestValueObject>
-        {
-            public TestValueObject(string value)
-            {
-                Value = value;
-            }
-
-            // ReSharper disable once MemberCanBePrivate.Local
-            public string Value { get; }
+            public string Name { get; }
 
             public bool Equals(TestValueObject other)
             {
-                return string.Equals(Value, other.Value);
+                return string.Equals(Name, other?.Name);
             }
 
             public override bool Equals(object obj)
@@ -49,41 +37,7 @@ namespace Winton.DomainModelling.DocumentDb
 
             public override int GetHashCode()
             {
-                return Value?.GetHashCode() ?? 0;
-            }
-        }
-
-        public sealed class Dto : ValueObjectDocumentTests
-        {
-            [Fact]
-            private void ShouldReturnValueObject()
-            {
-                var expected = new TestDto("A");
-                ValueObjectDocument<TestValueObject, TestDto> document =
-                    ValueObjectDocument<TestValueObject, TestDto>.Create(new TestValueObject("A"), expected);
-
-                TestDto dto = document.Dto;
-
-                dto.Should().Be(expected);
-            }
-
-            [Fact]
-            private void ShouldSerializePropertyNameAsValueObject()
-            {
-                typeof(ValueObjectDocument<TestValueObject, TestDto>)
-                    .GetProperty(nameof(ValueObjectDocument<TestValueObject, TestDto>.Dto))
-                    .Should().BeDecoratedWith<JsonPropertyAttribute>(a => a.PropertyName == "ValueObject");
-            }
-        }
-
-        public sealed class GetDocumentType : ValueObjectDocumentTests
-        {
-            [Fact]
-            private void ShouldReturnValueObjectType()
-            {
-                string type = ValueObjectDocument<TestValueObject, TestDto>.GetDocumentType();
-
-                type.Should().Be("TestValueObject");
+                return Name?.GetHashCode() ?? 0;
             }
         }
 
@@ -92,8 +46,7 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldDefaultToNull()
             {
-                ValueObjectDocument<TestValueObject, TestDto> document =
-                    ValueObjectDocument<TestValueObject, TestDto>.Create(new TestValueObject("A"), new TestDto("A"));
+                var document = ValueObjectDocument<TestValueObject>.Create("TestValueObject", new TestValueObject("A"));
 
                 string id = document.Id;
 
@@ -103,9 +56,37 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldSerializePropertyNameAsLowercase()
             {
-                typeof(ValueObjectDocument<TestValueObject, TestDto>)
-                    .GetProperty(nameof(ValueObjectDocument<TestValueObject, TestDto>.Id))
-                    .Should().BeDecoratedWith<JsonPropertyAttribute>(a => a.PropertyName == "id");
+                typeof(ValueObjectDocument<TestValueObject>)
+                    .GetProperty(nameof(ValueObjectDocument<TestValueObject>.Id))
+                    .Should()
+                    .BeDecoratedWith<JsonPropertyAttribute>(a => a.PropertyName == "id");
+            }
+        }
+
+        public sealed class Serialisation : ValueObjectDocumentTests
+        {
+            [Fact]
+            private void ShouldDeserialiseFromJson()
+            {
+                const string json = @"{""Type"":""TestValueObject"",""ValueObject"":{""Name"":""A""}}";
+
+                var document = JsonConvert.DeserializeObject<ValueObjectDocument<TestValueObject>>(json);
+
+                document
+                    .Should()
+                    .BeEquivalentTo(ValueObjectDocument<TestValueObject>.Create("TestValueObject", new TestValueObject("A")));
+            }
+
+            [Fact]
+            private void ShouldSerialiseAsJson()
+            {
+                var document = ValueObjectDocument<TestValueObject>.Create("TestValueObject", new TestValueObject("A"));
+
+                string serialised = JsonConvert.SerializeObject(document);
+
+                JsonConvert.DeserializeObject<ValueObjectDocument<TestValueObject>>(serialised)
+                    .Should()
+                    .BeEquivalentTo(document);
             }
         }
 
@@ -114,12 +95,33 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldReturnValueObjectType()
             {
-                ValueObjectDocument<TestValueObject, TestDto> document =
-                    ValueObjectDocument<TestValueObject, TestDto>.Create(new TestValueObject("A"), new TestDto("A"));
+                var document = ValueObjectDocument<TestValueObject>.Create("TestValueObject", new TestValueObject("A"));
 
                 string type = document.Type;
 
                 type.Should().Be("TestValueObject");
+            }
+        }
+
+        public sealed class Value : ValueObjectDocumentTests
+        {
+            [Fact]
+            private void ShouldReturnValueObject()
+            {
+                var document = ValueObjectDocument<TestValueObject>.Create("TestValueObject", new TestValueObject("A"));
+
+                TestValueObject value = document.Value;
+
+                value.Should().Be(new TestValueObject("A"));
+            }
+
+            [Fact]
+            private void ShouldSerializePropertyNameAsValueObject()
+            {
+                typeof(ValueObjectDocument<TestValueObject>)
+                    .GetProperty(nameof(ValueObjectDocument<TestValueObject>.Value))
+                    .Should()
+                    .BeDecoratedWith<JsonPropertyAttribute>(a => a.PropertyName == "ValueObject");
             }
         }
     }

@@ -1,44 +1,35 @@
 ﻿// Copyright (c) Winton. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System;
 using Newtonsoft.Json;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    internal sealed class EntityDocument<TEntity, TEntityId, TDto>
-        where TEntity : Entity<TEntityId>
-        where TEntityId : IEquatable<TEntityId>
+    internal sealed class EntityDocument<T>
     {
         [JsonConstructor]
-        private EntityDocument(TDto entity, string id, string type)
+        private EntityDocument(string id, string type, T entity)
         {
-            Dto = entity;
+            Entity = entity;
             Id = id;
             Type = type;
         }
 
-        [JsonProperty(PropertyName = "Entity")]
-        public TDto Dto { get; }
+        public T Entity { get; }
 
         [JsonProperty(PropertyName = "id")]
         public string Id { get; }
 
         public string Type { get; }
 
-        public static EntityDocument<TEntity, TEntityId, TDto> Create(TEntity entity, TDto dto)
+        internal static EntityDocument<T> Create(string id, string type, T entity)
         {
-            return new EntityDocument<TEntity, TEntityId, TDto>(dto, GetDocumentId(entity.Id), GetDocumentType());
+            return new EntityDocument<T>(CreateId(id, type), type, entity);
         }
 
-        public static string GetDocumentId(TEntityId id)
+        internal static string CreateId(string id, string type)
         {
-            return $"{GetDocumentType()}_{JsonConvert.SerializeObject(id)}";
-        }
-
-        public static string GetDocumentType()
-        {
-            return typeof(TEntity).Name;
+            return $"{type}_{id}";
         }
     }
 }

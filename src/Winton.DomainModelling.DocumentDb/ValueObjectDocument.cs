@@ -1,38 +1,31 @@
 ﻿// Copyright (c) Winton. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System;
 using Newtonsoft.Json;
 
 namespace Winton.DomainModelling.DocumentDb
 {
-    internal sealed class ValueObjectDocument<TValueObject, TDto>
-        where TValueObject : IEquatable<TValueObject>
+    internal sealed class ValueObjectDocument<T>
     {
         [JsonConstructor]
-        private ValueObjectDocument(TDto valueObject, string id, string type)
+        private ValueObjectDocument(string id, string type, T value)
         {
-            Dto = valueObject;
+            Value = value;
             Id = id;
             Type = type;
         }
-
-        [JsonProperty(PropertyName = "ValueObject")]
-        public TDto Dto { get; }
 
         [JsonProperty(PropertyName = "id")]
         public string Id { get; }
 
         public string Type { get; }
 
-        public static ValueObjectDocument<TValueObject, TDto> Create(TValueObject valueObject, TDto dto)
-        {
-            return new ValueObjectDocument<TValueObject, TDto>(dto, null, GetDocumentType());
-        }
+        [JsonProperty(PropertyName = "ValueObject")]
+        public T Value { get; }
 
-        public static string GetDocumentType()
+        internal static ValueObjectDocument<T> Create(string type, T value)
         {
-            return typeof(TValueObject).Name;
+            return new ValueObjectDocument<T>(null, type, value);
         }
     }
 }

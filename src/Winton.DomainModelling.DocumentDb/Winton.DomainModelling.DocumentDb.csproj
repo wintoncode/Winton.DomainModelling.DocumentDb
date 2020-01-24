@@ -16,7 +16,7 @@
     <PackageVersion>$(NuGetVersion)</PackageVersion>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/wintoncode/Winton.DomainModelling.DocumentDb</RepositoryUrl>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Title>Winton Domain Modelling DocumentDB</Title>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
@@ -27,13 +27,13 @@
 
   <ItemGroup>
     <AdditionalFiles Include="../../stylecop.json" />
-    <None Include="../../LICENSE" Pack="true" PackagePath=""/>
+    <None Include="../../LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.1.3" />
+    <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.9.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.0.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" PrivateAssets="All" />
-    <PackageReference Include="Winton.DomainModelling.Abstractions" Version="1.1.0" />
   </ItemGroup>
 
 </Project>

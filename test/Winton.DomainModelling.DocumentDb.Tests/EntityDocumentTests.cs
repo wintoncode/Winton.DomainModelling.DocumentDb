@@ -1,89 +1,24 @@
 ﻿// Copyright (c) Winton. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System;
 using FluentAssertions;
 using Newtonsoft.Json;
-using Winton.Extensions.Serialization.Json;
 using Xunit;
 
 namespace Winton.DomainModelling.DocumentDb
 {
     public class EntityDocumentTests
     {
-        [JsonConverter(typeof(SingleValueConverter))]
-        private struct EntityId : IEquatable<EntityId>
-        {
-            private readonly int _value;
-
-            private EntityId(int value)
-            {
-                _value = value;
-            }
-
-            public static explicit operator int(EntityId id)
-            {
-                return id._value;
-            }
-
-            public static explicit operator EntityId(int value)
-            {
-                return new EntityId(value);
-            }
-
-            public bool Equals(EntityId other)
-            {
-                return _value == other._value;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (obj is null)
-                {
-                    return false;
-                }
-
-                return obj is EntityId id && Equals(id);
-            }
-
-            public override int GetHashCode()
-            {
-                return _value;
-            }
-        }
-
-        private struct TestDto
-        {
-            public TestDto(int id)
-            {
-                Id = id;
-            }
-
-            // ReSharper disable once MemberCanBePrivate.Local
-            // ReSharper disable once UnusedAutoPropertyAccessor.Local
-            public int Id { get; }
-        }
-
-        public sealed class Dto : EntityDocumentTests
+        public sealed class Entity : EntityDocumentTests
         {
             [Fact]
-            private void ShouldReturnDto()
+            private void ShouldReturnEntity()
             {
-                var expected = new TestDto(1);
-                EntityDocument<TestEntity, EntityId, TestDto> document =
-                    EntityDocument<TestEntity, EntityId, TestDto>.Create(new TestEntity((EntityId)1), expected);
+                var document = EntityDocument<TestEntity>.Create("1", "TestEntity", new TestEntity("1"));
 
-                TestDto dto = document.Dto;
+                TestEntity entity = document.Entity;
 
-                dto.Should().Be(expected);
-            }
-
-            [Fact]
-            private void ShouldSerializePropertyNameAsEntity()
-            {
-                typeof(EntityDocument<TestEntity, EntityId, TestDto>)
-                    .GetProperty(nameof(EntityDocument<TestEntity, EntityId, TestDto>.Dto))
-                    .Should().BeDecoratedWith<JsonPropertyAttribute>(a => a.PropertyName == "Entity");
+                entity.Should().BeEquivalentTo(new TestEntity("1"));
             }
         }
 
@@ -92,20 +27,9 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldReturnEntityTypeAndEntityId()
             {
-                string id = EntityDocument<TestEntity, EntityId, TestDto>.GetDocumentId((EntityId)1);
+                string id = EntityDocument<TestEntity>.CreateId("1", "TestEntity");
 
                 id.Should().Be("TestEntity_1");
-            }
-        }
-
-        public sealed class GetDocumentType : EntityDocumentTests
-        {
-            [Fact]
-            private void ShouldReturnEntityType()
-            {
-                string type = EntityDocument<TestEntity, EntityId, TestDto>.GetDocumentType();
-
-                type.Should().Be("TestEntity");
             }
         }
 
@@ -114,8 +38,7 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldReturnEntityTypeAndEntityId()
             {
-                EntityDocument<TestEntity, EntityId, TestDto> document =
-                    EntityDocument<TestEntity, EntityId, TestDto>.Create(new TestEntity((EntityId)1), new TestDto(1));
+                var document = EntityDocument<TestEntity>.Create("1", "TestEntity", new TestEntity("1"));
 
                 string id = document.Id;
 
@@ -125,9 +48,37 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldSerializePropertyNameAsLowercase()
             {
-                typeof(EntityDocument<TestEntity, EntityId, TestDto>)
-                    .GetProperty(nameof(EntityDocument<TestEntity, EntityId, TestDto>.Id))
-                    .Should().BeDecoratedWith<JsonPropertyAttribute>(a => a.PropertyName == "id");
+                typeof(EntityDocument<TestEntity>)
+                    .GetProperty(nameof(EntityDocument<TestEntity>.Id))
+                    .Should()
+                    .BeDecoratedWith<JsonPropertyAttribute>(a => a.PropertyName == "id");
+            }
+        }
+
+        public sealed class Serialisation : EntityDocumentTests
+        {
+            [Fact]
+            private void ShouldDeserialiseFromJson()
+            {
+                const string json = @"{""Entity"":{""Id"":""1""},""id"":""TestEntity_1"",""Type"":""TestEntity""}";
+
+                var document = JsonConvert.DeserializeObject<EntityDocument<TestEntity>>(json);
+
+                document
+                    .Should()
+                    .BeEquivalentTo(EntityDocument<TestEntity>.Create("1", "TestEntity", new TestEntity("1")));
+            }
+
+            [Fact]
+            private void ShouldSerialiseAsJson()
+            {
+                var document = EntityDocument<TestEntity>.Create("1", "TestEntity", new TestEntity("1"));
+
+                string serialised = JsonConvert.SerializeObject(document);
+
+                JsonConvert.DeserializeObject<EntityDocument<TestEntity>>(serialised)
+                           .Should()
+                           .BeEquivalentTo(document);
             }
         }
 
@@ -136,8 +87,7 @@ namespace Winton.DomainModelling.DocumentDb
             [Fact]
             private void ShouldReturnEntityType()
             {
-                EntityDocument<TestEntity, EntityId, TestDto> document =
-                    EntityDocument<TestEntity, EntityId, TestDto>.Create(new TestEntity((EntityId)1), new TestDto(1));
+                var document = EntityDocument<TestEntity>.Create("1", "TestEntity", new TestEntity("1"));
 
                 string type = document.Type;
 
@@ -145,12 +95,14 @@ namespace Winton.DomainModelling.DocumentDb
             }
         }
 
-        private sealed class TestEntity : Entity<EntityId>
+        private sealed class TestEntity
         {
-            public TestEntity(EntityId id)
-                : base(id)
+            public TestEntity(string id)
             {
+                Id = id;
             }
+
+            public string Id { get; }
         }
     }
 }
