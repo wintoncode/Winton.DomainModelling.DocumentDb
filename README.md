@@ -1,7 +1,7 @@
 # Winton.DomainModelling.DocumentDb
 
-[![Build status](https://ci.appveyor.com/api/projects/status/9472sx6gw9y7lq0q?svg=true)](https://ci.appveyor.com/project/wintoncode/winton-domainmodelling-documentdb/branch/master)
-[![Travis Build Status](https://travis-ci.org/wintoncode/Winton.DomainModelling.DocumentDb.svg?branch=master)](https://travis-ci.org/wintoncode/Winton.DomainModelling.DocumentDb)
+[![Appveyor](https://ci.appveyor.com/api/projects/status/9472sx6gw9y7lq0q?svg=true)](https://ci.appveyor.com/project/wintoncode/winton-domainmodelling-documentdb/branch/master)
+[![Travis CI](https://travis-ci.com/wintoncode/Winton.DomainModelling.DocumentDb.svg?branch=master)](https://travis-ci.com/wintoncode/Winton.DomainModelling.DocumentDb)
 [![NuGet version](https://img.shields.io/nuget/v/Winton.DomainModelling.DocumentDb.svg)](https://www.nuget.org/packages/Winton.DomainModelling.DocumentDb)
 [![NuGet version](https://img.shields.io/nuget/vpre/Winton.DomainModelling.DocumentDb.svg)](https://www.nuget.org/packages/Winton.DomainModelling.DocumentDb)
 
