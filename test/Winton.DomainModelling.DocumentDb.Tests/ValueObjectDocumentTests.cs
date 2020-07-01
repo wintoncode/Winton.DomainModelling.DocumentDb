@@ -67,7 +67,7 @@ namespace Winton.DomainModelling.DocumentDb
             // ReSharper disable once MemberCanBePrivate.Local
             public string Name { get; }
 
-            public bool Equals(TestValueObject other) => string.Equals(Name, other?.Name);
+            public bool Equals(TestValueObject? other) => string.Equals(Name, other?.Name);
 
             public override bool Equals(object? obj) => !(obj is null) && obj is TestValueObject o && Equals(o);
 
