@@ -192,7 +192,7 @@ namespace Winton.DomainModelling.DocumentDb
 
             public int Value { get; }
 
-            public bool Equals(OtherTestValueObject other) => Value == other?.Value;
+            public bool Equals(OtherTestValueObject? other) => Value == other?.Value;
 
             public override bool Equals(object? obj) => !(obj is null) && obj is OtherTestValueObject o && Equals(o);
 
@@ -209,7 +209,7 @@ namespace Winton.DomainModelling.DocumentDb
 
             public int Value { get; }
 
-            public bool Equals(TestValueObject other) => Value == other?.Value;
+            public bool Equals(TestValueObject? other) => Value == other?.Value;
 
             public override bool Equals(object? obj) => !(obj is null) && obj is TestValueObject o && Equals(o);
 
