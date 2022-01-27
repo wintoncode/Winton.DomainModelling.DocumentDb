@@ -1,4 +1,6 @@
-# Winton.DomainModelling.DocumentDb
+# [DEPRECATED] Winton.DomainModelling.DocumentDb
+
+> :warning: **This repo is no longer maintained**: We recommend using a library that supports the [Microsoft.Azure.Cosmos SDK](https://www.nuget.org/packages/Microsoft.Azure.Cosmos/)
 
 [![Appveyor](https://ci.appveyor.com/api/projects/status/9472sx6gw9y7lq0q?svg=true)](https://ci.appveyor.com/project/wintoncode/winton-domainmodelling-documentdb/branch/master)
 [![Travis CI](https://travis-ci.com/wintoncode/Winton.DomainModelling.DocumentDb.svg?branch=master)](https://travis-ci.com/wintoncode/Winton.DomainModelling.DocumentDb)
